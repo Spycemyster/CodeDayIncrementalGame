@@ -1,5 +1,6 @@
 ﻿#region Using Statements
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -49,7 +50,16 @@ namespace CodeDay_Project
         /// <summary>
         /// Timer for the counting down cooldowns.
         /// </summary>
-        public float timer
+        public float Timer
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// The texture of the icon.
+        /// </summary>
+        public Texture2D Texture
         {
             get;
             set;
@@ -90,7 +100,10 @@ namespace CodeDay_Project
         /// <param name="gameTime"></param>
         public void Update(GameTime gameTime)
         {
-
+            if (Timer <= Cooldown * 1000f)
+            {
+                Timer += (float)gameTime.ElapsedGameTime.TotalMilliseconds;
+            }
         }
 
         /// <summary>
@@ -99,7 +112,7 @@ namespace CodeDay_Project
         /// <param name="e"></param>
         public void InflictOn(Entity e)
         {
-            
+            Timer = 0f;
         }
         #endregion
     }

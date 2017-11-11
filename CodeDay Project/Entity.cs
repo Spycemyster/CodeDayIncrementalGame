@@ -88,6 +88,15 @@ namespace CodeDay_Project
             get;
             set;
         }
+
+        /// <summary>
+        /// The texture of the entity.
+        /// </summary>
+        public Texture2D Texture
+        {
+            get;
+            set;
+        }
         #endregion
 
         #region Constructor

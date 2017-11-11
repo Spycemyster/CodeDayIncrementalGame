@@ -22,6 +22,11 @@ namespace CodeDay_Project
     public class Player : Entity
     {
         #region Fields
+        public int Level
+        {
+            get;
+            set;
+        }
         #endregion
 
         #region Constructor
@@ -35,12 +40,21 @@ namespace CodeDay_Project
 
         #region Methods
         /// <summary>
+        /// Levels up the character's stats.
+        /// </summary>
+        public void LevelUp()
+        {
+
+        }
+
+        /// <summary>
         /// Draws the player to the screen.
         /// </summary>
         /// <param name="spriteBatch"></param>
         public override void Draw(SpriteBatch spriteBatch)
         {
             base.Draw(spriteBatch);
+            
         }
         #endregion
     }

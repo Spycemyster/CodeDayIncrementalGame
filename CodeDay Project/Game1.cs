@@ -14,10 +14,18 @@ namespace CodeDay_Project
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
 
+        private Ability[] abilities; //electricity, fire, ice, earth;
+        private Player player;
+
         /// <summary>
         /// A blank static texture. 1x1 pixel
         /// </summary>
         public static Texture2D Blank;
+
+        /// <summary>
+        /// The default font for all text.
+        /// </summary>
+        public static SpriteFont Font;
 
         /// <summary>
         /// Width dimension for the window.
@@ -66,6 +74,20 @@ namespace CodeDay_Project
 
             // TODO: use this.Content to load your game content here
             Blank = Content.Load<Texture2D>("Blank");
+            Font = Content.Load<SpriteFont>("Font");
+
+            player = new Player();
+            player.Texture = Content.Load<Texture2D>("resources/wizardAndStaff/wizard0");
+            player.AbilityPower = 10;
+            player.CurrentHealth = 100;
+            player.MaxHealth = 100;
+            player.CurrentMana = 50;
+            player.MaxMana = 50;
+            
+            abilities = new Ability[4];
+            abilities[0] = new Ability(player, 10, 0.5f);
+            abilities[0].Cooldown = 5f;
+            abilities[0].Texture = Content.Load<Texture2D>("resources/abilities/ability_0");
         }
 
         /// <summary>
@@ -74,7 +96,7 @@ namespace CodeDay_Project
         /// </summary>
         protected override void UnloadContent()
         {
-            // TODO: Unload any non ContentManager content here
+            
         }
 
         /// <summary>
@@ -87,8 +109,9 @@ namespace CodeDay_Project
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
 
-            // TODO: Add your update logic here
-
+            for (int i = 0; i < abilities.Length; i++)
+                abilities[i]?.Update(gameTime);
+            
             base.Update(gameTime);
         }
 
@@ -99,11 +122,45 @@ namespace CodeDay_Project
         protected override void Draw(GameTime gameTime)
         {
             GraphicsDevice.Clear(Color.CornflowerBlue);
-            
-            spriteBatch.Begin();
+
+            spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
+                SamplerState.PointClamp, null, null, null, null);
+
+
+            // players and entities
+            player.Draw(spriteBatch);
+
+            // UI
             spriteBatch.Draw(Blank, new Rectangle(0, WINDOW_HEIGHT - WINDOW_HEIGHT / 4 - 60, WINDOW_WIDTH, 60), Color.Gray);
-            spriteBatch.Draw(Blank, new Rectangle(0, WINDOW_HEIGHT - WINDOW_HEIGHT / 4, WINDOW_WIDTH, WINDOW_HEIGHT / 4), Color.LightGray);
+            spriteBatch.Draw(Blank, new Rectangle(0, WINDOW_HEIGHT - WINDOW_HEIGHT / 4, WINDOW_WIDTH - WINDOW_WIDTH * 2 / 7, WINDOW_HEIGHT / 4), Color.LightGray);
             spriteBatch.Draw(Blank, new Rectangle(WINDOW_WIDTH - WINDOW_WIDTH * 2 / 7, 0, WINDOW_WIDTH * 2 / 7, WINDOW_HEIGHT), Color.White);
+            int width = WINDOW_WIDTH - WINDOW_WIDTH * 2 / 7;
+            int border = 16;
+            int iconWidth = (width - border * 6) / 5 - 16;
+
+            for (int i = 0; i < abilities.Length; i++)
+            {
+                if (abilities[i] != null)
+                {
+                    Color c = Color.White;
+                    float ability = 0f;
+                    if (abilities[i].Timer < abilities[i].Cooldown * 1000f)
+                    {
+                        c = Color.Gray;
+                        ability = abilities[i].Timer / 1000f;
+                    }
+                    int y = WINDOW_HEIGHT - WINDOW_HEIGHT / 4 + border;
+                    int x = (iconWidth + border) * i;
+                    spriteBatch.Draw(abilities[i].Texture, new Rectangle(x, y, iconWidth, iconWidth), c);
+                    if (abilities[i].Timer < abilities[i].Cooldown * 1000f)
+                    {
+                        string text = "" + (int)(abilities[i].Cooldown - ability + 1);
+                        spriteBatch.DrawString(Font, text, 
+                            new Vector2(x + iconWidth / 2 - Font.MeasureString(text).X / 2,
+                            y + iconWidth / 2 - Font.MeasureString(text).Y / 2), Color.LightGray);
+                    }
+                }
+            }
             spriteBatch.End();
 
             base.Draw(gameTime);
