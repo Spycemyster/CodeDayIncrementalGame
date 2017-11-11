@@ -64,6 +64,15 @@
     <Content Include="Content\resources\abilities\ability_2.png" />
     <Content Include="Content\resources\abilities\ability_3.png" />
     <Content Include="Content\resources\abilities\ability_4.png" />
+    <Content Include="Content\resources\particles\particle_0.png" />
+    <Content Include="Content\resources\particles\particle_1.png" />
+    <Content Include="Content\resources\particles\particle_2.png" />
+    <Content Include="Content\resources\particles\particle_3.png" />
+    <Content Include="Content\resources\particles\particle_4.png" />
+    <Content Include="Content\resources\particles\particle_5.png" />
+    <Content Include="Content\resources\particles\particle_6.png" />
+    <Content Include="Content\resources\particles\particle_7.png" />
+    <Content Include="Content\resources\particles\particle_8.png" />
     <Content Include="Content\resources\wizardAndStaff\wizard0.png" />
     <Content Include="Content\resources\wizardAndStaff\wizard1.png" />
     <Content Include="Icon.ico" />
@@ -73,6 +82,7 @@
     <None Include="app.manifest" />
     <None Include="Content\Font.spritefont" />
     <None Include="Content\resources\abilities\abillities-20171111-141556.piskel" />
+    <None Include="Content\resources\particles\particles-20171111-153704.piskel" />
     <None Include="Content\resources\wizardAndStaff\wizardAndStaff-20171111-144632.piskel" />
   </ItemGroup>
   <ItemGroup>
