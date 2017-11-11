@@ -2,7 +2,6 @@
 
 namespace CodeDay_Project
 {
-#if WINDOWS || LINUX
     /// <summary>
     /// The main class.
     /// </summary>
@@ -18,5 +17,4 @@ namespace CodeDay_Project
                 game.Run();
         }
     }
-#endif
 }

@@ -5,12 +5,29 @@ using Microsoft.Xna.Framework.Input;
 namespace CodeDay_Project
 {
     /// <summary>
+    /// Author: Spencer Chang, Ryan Niu
+    /// Date: November 11, 2017
     /// This is the main type for your game.
     /// </summary>
     public class Game1 : Game
     {
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
+
+        /// <summary>
+        /// A blank static texture. 1x1 pixel
+        /// </summary>
+        public static Texture2D Blank;
+
+        /// <summary>
+        /// Width dimension for the window.
+        /// </summary>
+        public const int WINDOW_WIDTH = 1280;
+
+        /// <summary>
+        /// Height dimension for the window.
+        /// </summary>
+        public const int WINDOW_HEIGHT = 720;
 
         public Game1()
         {
@@ -26,7 +43,14 @@ namespace CodeDay_Project
         /// </summary>
         protected override void Initialize()
         {
-            // TODO: Add your initialization logic here
+            IsFixedTimeStep = false;
+
+            //WINDOW_HEIGHT = graphics.GraphicsDevice.Adapter.CurrentDisplayMode.Height * 2 / 3;
+            //WINDOW_WIDTH = graphics.GraphicsDevice.Adapter.CurrentDisplayMode.Width * 2 / 3;
+            graphics.PreferredBackBufferWidth = WINDOW_WIDTH;
+            graphics.PreferredBackBufferHeight = WINDOW_HEIGHT;
+            IsMouseVisible = true;
+            graphics.ApplyChanges();
 
             base.Initialize();
         }
@@ -41,6 +65,7 @@ namespace CodeDay_Project
             spriteBatch = new SpriteBatch(GraphicsDevice);
 
             // TODO: use this.Content to load your game content here
+            Blank = Content.Load<Texture2D>("Blank");
         }
 
         /// <summary>
@@ -74,8 +99,12 @@ namespace CodeDay_Project
         protected override void Draw(GameTime gameTime)
         {
             GraphicsDevice.Clear(Color.CornflowerBlue);
-
-            // TODO: Add your drawing code here
+            
+            spriteBatch.Begin();
+            spriteBatch.Draw(Blank, new Rectangle(0, WINDOW_HEIGHT - WINDOW_HEIGHT / 4 - 60, WINDOW_WIDTH, 60), Color.Gray);
+            spriteBatch.Draw(Blank, new Rectangle(0, WINDOW_HEIGHT - WINDOW_HEIGHT / 4, WINDOW_WIDTH, WINDOW_HEIGHT / 4), Color.LightGray);
+            spriteBatch.Draw(Blank, new Rectangle(WINDOW_WIDTH - WINDOW_WIDTH * 2 / 7, 0, WINDOW_WIDTH * 2 / 7, WINDOW_HEIGHT), Color.White);
+            spriteBatch.End();
 
             base.Draw(gameTime);
         }
