@@ -58,11 +58,21 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Content\Blank.png" />
+    <Content Include="Content\resources\abillities\abillityBorder.png" />
+    <Content Include="Content\resources\abillities\abillity_0.png" />
+    <Content Include="Content\resources\abillities\abillity_1.png" />
+    <Content Include="Content\resources\abillities\abillity_2.png" />
+    <Content Include="Content\resources\abillities\abillity_3.png" />
+    <Content Include="Content\resources\abillities\abillity_4.png" />
+    <Content Include="Content\resources\wizardAndStaff\wizard0.png" />
+    <Content Include="Content\resources\wizardAndStaff\wizard1.png" />
     <Content Include="Icon.ico" />
   </ItemGroup>
   <ItemGroup>
     <MonoGameContentReference Include="Content\Content.mgcb" />
     <None Include="app.manifest" />
+    <None Include="Content\resources\abillities\abillities-20171111-141556.piskel" />
+    <None Include="Content\resources\wizardAndStaff\wizardAndStaff-20171111-144632.piskel" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(MSBuildExtensionsPath)\MonoGame\v3.0\MonoGame.Content.Builder.targets" />
