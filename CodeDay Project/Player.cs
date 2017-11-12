@@ -29,7 +29,7 @@ namespace CodeDay_Project {
         /// </summary>
         private Texture2D StaffTexture;
 
-        private SoundEffect takeDamageSfx;
+        private SoundEffect takeDamageSfx, naClSfx0, naClSfx1;
 
         /// <summary>
         /// Has the active buff on.
@@ -56,6 +56,7 @@ namespace CodeDay_Project {
         private float animationTimer, attackTimer, damageTimer, manaTimer, healthTimer;
         public bool isAttacking, isAttacked;
         public bool hasAttacked;
+        private Random rand;
         #endregion
 
         #region Constructor
@@ -70,6 +71,7 @@ namespace CodeDay_Project {
             hasAttacked = false;
             isAttacked = false;
             isAlive = true;
+            rand = new Random();
         }
         #endregion
 
@@ -85,6 +87,8 @@ namespace CodeDay_Project {
             Texture = Content.Load<Texture2D>("resources/wizardAndStaff/wizard0");
             StaffTexture = Content.Load<Texture2D>("resources/wizardAndStaff/wizard1");
             takeDamageSfx = Content.Load<SoundEffect>("resources/SFX/playerDmg");
+            naClSfx0 = Content.Load<SoundEffect>("resources/SFX/thastWhatISaid");
+            naClSfx1 = Content.Load<SoundEffect>("resources/SFX/NaCl");
         }
 
         public override void Damage(float amount) {
@@ -103,6 +107,14 @@ namespace CodeDay_Project {
 
         public void Attack() {
             hasAttacked = true;
+
+            if (CurrentEnemy.Name.Equals("[BOSS] Skeet"))
+            {
+                if (rand.Next(0, 2) == 0)
+                    naClSfx0.Play(0.6f, 0f, 0f);
+                else
+                    naClSfx1.Play(0.6f, 0f, 0f);
+            }
         }
 
         /// <summary>

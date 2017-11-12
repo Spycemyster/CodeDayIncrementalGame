@@ -56,7 +56,7 @@ namespace CodeDay_Project {
         private Rectangle healthBar, manaBar, cHealthBar, cManaBar, coinRectangle, eHealth, ecHealth;
         private Song currentSong;
         private Song[] songs;
-        private SoundEffect selfSfx, superSfx;
+        private SoundEffect selfSfx, healSfx, superSfx;
         /// <summary>
         /// A blank static texture. 1x1 pixel
         /// </summary>
@@ -138,6 +138,7 @@ namespace CodeDay_Project {
             SmallFont = Content.Load<SpriteFont>("RegularFont");
             superSfx = Content.Load<SoundEffect>("resources/SFX/superAbility");
             selfSfx = Content.Load<SoundEffect>("resources/SFX/selfBuff");
+            healSfx = Content.Load<SoundEffect>("resources/SFX/heal");
             songs = new Song[3];
             for (int i = 0; i < songs.Length; i++)
                 songs[i] = Content.Load<Song>("resources/bgm/Stage " + i);
@@ -181,7 +182,7 @@ namespace CodeDay_Project {
             player.MaxHealth = 100;
             player.CurrentMana = 50;
             player.MaxMana = 50;
-            player.ManaRegen = 5;
+            player.ManaRegen = 10;
             player.HealthRegen = 10;
             abilityBorder = Content.Load<Texture2D>("resources/abilities/abilityBorder");
             shopBorder = Content.Load<Texture2D>("resources/backgrounds/shopBackground");
@@ -448,7 +449,7 @@ namespace CodeDay_Project {
                                     selfBuffActive = true;
                                     break;
                                 case 5:
-                                    selfSfx.Play(0.9f, 0f, 0f);
+                                    healSfx.Play(0.9f, 0f, 0f);
                                     player.CurrentHealth = Math.Min(player.MaxHealth, player.CurrentHealth + player.AbilityPower);
                                     break;
                             }

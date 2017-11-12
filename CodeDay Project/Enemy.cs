@@ -28,7 +28,7 @@ namespace CodeDay_Project {
         public bool hasAttacked;
         private float damageTimer;
         private Player player;
-        private SoundEffect dootSfx, takeDamageSfx;
+        private SoundEffect dootSfx, dudeSfx, takeDamageSfx;
         #endregion
 
         #region Constructor
@@ -55,6 +55,9 @@ namespace CodeDay_Project {
             base.LoadContent(Content);
             if (Name.Equals("*doot*\nSpooky Scary Skeleton\n*doot*"))
                 dootSfx = Content.Load<SoundEffect>("resources/SFX/doot");
+            else if (Name.Equals("[BOSS] Skeet"))
+                dudeSfx = Content.Load <SoundEffect>("resources/SFX/itsSalt");
+
 
             takeDamageSfx = Content.Load<SoundEffect>("resources/SFX/enemyDmg");
         }
@@ -62,7 +65,8 @@ namespace CodeDay_Project {
         public void Attack() {
             player.Damage(AbilityPower);
             hasAttacked = true;
-            dootSfx?.Play(0.6f, 0f, 0f);
+            dootSfx?.Play(0.7f, 0f, 0f);
+            dudeSfx?.Play(1.0f, 0f, 0f);
         }
 
         /// <summary>

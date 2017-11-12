@@ -639,3 +639,27 @@
 /processorParam:Quality=Best
 /build:resources/SFX/superAbility.wav
 
+#begin resources/SFX/heal.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:resources/SFX/heal.wav
+
+#begin resources/SFX/itsSalt.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:resources/SFX/itsSalt.wav
+
+#begin resources/SFX/NaCl.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:resources/SFX/NaCl.wav
+
+#begin resources/SFX/thastWhatISaid.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:resources/SFX/thastWhatISaid.wav
+
