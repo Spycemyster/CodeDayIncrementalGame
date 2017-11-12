@@ -119,9 +119,7 @@ namespace CodeDay_Project
         public void Update(GameTime gameTime)
         {
             if (Timer <= Cooldown * 1000f)
-            {
                 Timer += (float)gameTime.ElapsedGameTime.TotalMilliseconds;
-            }
         }
 
         /// <summary>

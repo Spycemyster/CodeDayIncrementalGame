@@ -99,6 +99,7 @@
     <MonoGameContentReference Include="Content\Content.mgcb" />
     <None Include="app.manifest" />
     <None Include="Content\Font.spritefont" />
+    <None Include="Content\RegularFont.spritefont" />
     <None Include="Content\resources\abilities\abillities-20171111-141556.piskel" />
     <None Include="Content\resources\EnemiesAndBosses\EnemiesAndBosses-20171111-171846.piskel" />
     <None Include="Content\resources\particles\particles-20171111-153704.piskel" />
