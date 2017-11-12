@@ -161,7 +161,7 @@ namespace CodeDay_Project {
             backgrounds[2] = Content.Load<Texture2D>("resources/backgrounds/space");
             coinTexture = Content.Load<Texture2D>("resources/GUI/coin");
             autoSaveTimer = 0f;
-            money = 50000000f;
+            money = 100f;
 
             projectiles = new List<Projectile>();
 
@@ -331,7 +331,7 @@ namespace CodeDay_Project {
                                 break;
 
                             case 2:
-                                player.AbilityPower += 7f;
+                                player.AbilityPower += 5f;
                                 break;
 
                             case 3:
