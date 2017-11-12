@@ -66,10 +66,14 @@
     <Content Include="Content\resources\abilities\ability_2.png" />
     <Content Include="Content\resources\abilities\ability_3.png" />
     <Content Include="Content\resources\abilities\ability_4.png" />
+    <Content Include="Content\resources\abilities\ability_5.png" />
     <Content Include="Content\resources\backgrounds\inside.png" />
     <Content Include="Content\resources\backgrounds\outside.png" />
     <Content Include="Content\resources\backgrounds\shopBackground.png" />
     <Content Include="Content\resources\backgrounds\space.png" />
+    <Content Include="Content\resources\bgm\Stage 1.wav" />
+    <Content Include="Content\resources\bgm\Stage 3.wav" />
+    <Content Include="Content\resources\bgm\Stage 4.wav" />
     <Content Include="Content\resources\EnemiesAndBosses\enemy_00.png" />
     <Content Include="Content\resources\EnemiesAndBosses\enemy_01.png" />
     <Content Include="Content\resources\EnemiesAndBosses\enemy_02.png" />
@@ -97,6 +101,11 @@
     <Content Include="Content\resources\particles\particle_6.png" />
     <Content Include="Content\resources\particles\particle_7.png" />
     <Content Include="Content\resources\particles\particle_8.png" />
+    <Content Include="Content\resources\SFX\doot.wav" />
+    <Content Include="Content\resources\SFX\enemyDmg.wav" />
+    <Content Include="Content\resources\SFX\playerDmg.wav" />
+    <Content Include="Content\resources\SFX\selfBuff.wav" />
+    <Content Include="Content\resources\SFX\superAbility.wav" />
     <Content Include="Content\resources\wizardAndStaff\wizard0.png" />
     <Content Include="Content\resources\wizardAndStaff\wizard1.png" />
     <Content Include="Content\resources\wizardAndStaff\wizard_0.png" />
