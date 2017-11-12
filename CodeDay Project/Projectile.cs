@@ -52,6 +52,15 @@ namespace CodeDay_Project
         }
 
         /// <summary>
+        /// The amount of damage on collision.
+        /// </summary>
+        public float CollisionalDamage
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
         /// The rectangle that the projectile is drawn in.
         /// </summary>
         public Rectangle DrawRectangle

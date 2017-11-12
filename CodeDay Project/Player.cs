@@ -32,14 +32,7 @@ namespace CodeDay_Project
             get;
             set;
         }
-        /// <summary>
-        /// The level of the player
-        /// </summary>
-        public int Level
-        {
-            get;
-            set;
-        }
+
         private const int SCALE = 3;
         private float rotation;
         private float animationTimer, attackTimer;
