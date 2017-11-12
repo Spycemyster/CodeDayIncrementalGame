@@ -283,8 +283,6 @@ namespace CodeDay_Project {
         /// </summary>
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Update(GameTime gameTime) {
-            if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
-                Exit();
             player.HasActiveBuff = selfBuffActive;
             int border2 = 12;
             float percentHealth = player.CurrentHealth / player.MaxHealth;
