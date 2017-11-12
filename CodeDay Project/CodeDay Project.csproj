@@ -108,13 +108,16 @@
     <Content Include="Content\resources\particles\particle_8.png" />
     <Content Include="Content\resources\SFX\doot.wav" />
     <Content Include="Content\resources\SFX\enemyDmg.wav" />
+    <Content Include="Content\resources\SFX\gameOver.wav" />
     <Content Include="Content\resources\SFX\heal.wav" />
     <Content Include="Content\resources\SFX\itsSalt.wav" />
     <Content Include="Content\resources\SFX\NaCl.wav" />
     <Content Include="Content\resources\SFX\playerDmg.wav" />
     <Content Include="Content\resources\SFX\selfBuff.wav" />
+    <Content Include="Content\resources\SFX\shop0.wav" />
+    <Content Include="Content\resources\SFX\shop1.wav" />
     <Content Include="Content\resources\SFX\superAbility.wav" />
-    <Content Include="Content\resources\SFX\thastWhatISaid.wav" />
+    <Content Include="Content\resources\SFX\thatsWhatISaid.wav" />
     <Content Include="Content\resources\wizardAndStaff\wizard0.png" />
     <Content Include="Content\resources\wizardAndStaff\wizard1.png" />
     <Content Include="Content\resources\wizardAndStaff\wizard_0.png" />
