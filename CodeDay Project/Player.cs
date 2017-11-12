@@ -138,9 +138,9 @@ namespace CodeDay_Project {
             if (isAttacking) {
                 attackTimer += (float)gameTime.ElapsedGameTime.TotalMilliseconds;
                 animationTimer += (float)gameTime.ElapsedGameTime.TotalMilliseconds;
-                float s = Speed;
+                float s = Math.Max(1, Speed);
                 if (HasActiveBuff)
-                    s = Speed / 2;
+                    s = Math.Max(1, Speed / 2);
                 rotation = (float)(-(Math.PI / 4) * Math.Cos(animationTimer * (2 * Math.PI / s)) + Math.PI / 6);
                 if (attackTimer >= s) {
                     Attack();

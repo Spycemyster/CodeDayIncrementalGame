@@ -161,7 +161,7 @@ namespace CodeDay_Project {
             backgrounds[2] = Content.Load<Texture2D>("resources/backgrounds/space");
             coinTexture = Content.Load<Texture2D>("resources/GUI/coin");
             autoSaveTimer = 0f;
-            money = 0f;
+            money = 50000000f;
 
             projectiles = new List<Projectile>();
 
@@ -186,7 +186,7 @@ namespace CodeDay_Project {
             player.MaxHealth = 100;
             player.CurrentMana = 50;
             player.MaxMana = 50;
-            player.ManaRegen = 10;
+            player.ManaRegen = 20;
             player.HealthRegen = 10;
             abilityBorder = Content.Load<Texture2D>("resources/abilities/abilityBorder");
             shopBorder = Content.Load<Texture2D>("resources/backgrounds/shopBackground");
@@ -304,14 +304,18 @@ namespace CodeDay_Project {
                 if (shopRectangles[i].Contains(Mouse.GetState().Position))
                 {
                     shopColors[i] = Color.DarkGray;
-                    if (InputManager.Instance.leftMouseButtonClicked() && money >= shopCosts[i])
+                    if (InputManager.Instance.leftMouseButtonClicked() && money >= shopCosts[i] && !(i == 3 && shopCounts[i] >= 25))
                     {
+                        
                         if (rand.Next(0, 2) == 0)
                             shop0.Play(0.9f, 0f, 0f);
                         else
                             shop1.Play(0.9f, 0f, 0f);
                         money -= shopCosts[i];
-                        shopCosts[i] += (float)(Math.Log10((shopCounts[i]) * 10) * 100);
+                        if (i == 3)
+                            shopCosts[i] *= 1.5f;
+                        else
+                            shopCosts[i] += (float)(Math.Log10((shopCounts[i]) * 10) * 100);
                         shopCounts[i]++;
 
                         switch (i)
@@ -319,6 +323,7 @@ namespace CodeDay_Project {
                             case 0:
                                 player.CurrentHealth += 20f;
                                 player.MaxHealth += 20f;
+                                player.HealthRegen += 1;
                                 break;
 
                             case 1:
@@ -338,6 +343,9 @@ namespace CodeDay_Project {
                     }
                 }
             }
+
+            if (shopCounts[3] >= 25)
+                shopColors[3] = Color.Goldenrod;
 
             if (selfBuffActive)
             {
@@ -467,7 +475,7 @@ namespace CodeDay_Project {
                                     player.CurrentHealth = Math.Min(player.MaxHealth, player.CurrentHealth + player.AbilityPower);
                                     break;
                             }
-                            if (i != 4)
+                            if (i != 4 && i != 5)
                                 hasChangedStances = true;
                             player.CurrentMana -= abilities[i].Cost;
                             abilities[i].InflictOn(currentEnemy);
@@ -537,9 +545,9 @@ namespace CodeDay_Project {
             spriteBatch.Draw(Blank, new Rectangle(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT), Color.Black * dimOpacity);
 
             // UI
-            spriteBatch.DrawString(Font, "Floor " + floor, new Vector2(0, 0), Color.Black);
-            spriteBatch.DrawString(SmallFont, " - ", new Vector2(Font.MeasureString("Floor " + floor).X,
-                Font.MeasureString("Floor " + floor).Y / 2 - SmallFont.MeasureString(" - ").Y / 2), Color.Black);
+            spriteBatch.DrawString(Font, "Floor " + floor, new Vector2(4, 4), Color.Black);
+            spriteBatch.DrawString(SmallFont, " - ", new Vector2(Font.MeasureString("Floor " + floor).X + 4,
+                Font.MeasureString("Floor " + floor).Y / 2 - SmallFont.MeasureString(" - ").Y / 2 + 4), Color.Black);
             spriteBatch.DrawString(SmallFont, currentEnemy.Name, new Vector2(Font.MeasureString("Floor " + floor).X + SmallFont.MeasureString(" - ").X,
                 Font.MeasureString("Floor " + floor).Y / 2 - SmallFont.MeasureString(currentEnemy.Name).Y / 2), Color.Black);
             spriteBatch.DrawString(SmallFont, player.Name, new Vector2(player.DrawRectangle.Width / 2 + SmallFont.MeasureString(player.Name).X / 2, player.DrawRectangle.Y - SmallFont.MeasureString(player.Name).Y - 10), Color.Black);
@@ -558,17 +566,17 @@ namespace CodeDay_Project {
             for (int i = 0; i < shopIcons.Length; i++)
             {
                 spriteBatch.Draw(shopIcons[i], shopRectangles[i], shopColors[i]);
-                if (shopColors[i] != Color.White)
+                if (shopColors[i] != Color.White && shopColors[i] != Color.Goldenrod)
                 {
                     string text = shopCosts[i].ToString("C", new CultureInfo("en-US"));
                     spriteBatch.DrawString(SmallFont, text, Mouse.GetState().Position.ToVector2() + new Vector2(10, 12) + new Vector2(1, 1), Color.Black * 0.6f);
                     spriteBatch.DrawString(SmallFont, text, Mouse.GetState().Position.ToVector2() + new Vector2(10, 12), Color.White);
                 }
             }
-            string uH = "Upgrade Health";
-            string uA = "Upgrade Defense";
-            string uD = "Upgrade Damage";
-            string uS = "Upgrade Speed";
+            string uH = "Upgrade Health -   " + shopCounts[0];
+            string uA = "Upgrade Defense -  " + shopCounts[1];
+            string uD = "Upgrade Damage -   " + shopCounts[2];
+            string uS = "Upgrade Speed -    " + (shopCounts[3] >= 25 ? "MAX" : "" + shopCounts[3]);
             spriteBatch.DrawString(SmallFont, uH, new Vector2(
                 shopRectangles[0].X + shopRectangles[0].Width + 16 + 1, shopRectangles[0].Y +
                 shopRectangles[0].Height / 2 - SmallFont.MeasureString(uH).Y / 2 + 1), Color.Black * 0.5f);
@@ -587,13 +595,14 @@ namespace CodeDay_Project {
             spriteBatch.DrawString(SmallFont, uD, new Vector2(
                 shopRectangles[2].X + shopRectangles[0].Width + 16, shopRectangles[2].Y +
                 shopRectangles[2].Height / 2 - SmallFont.MeasureString(uD).Y / 2), Color.White);
-            spriteBatch.DrawString(SmallFont, uS, new Vector2(1 +
-                shopRectangles[3].X + shopRectangles[0].Width + 16, 1 + shopRectangles[3].Y +
-                shopRectangles[3].Height / 2 - SmallFont.MeasureString(uS).Y / 2), Color.Black * 0.5f);
-            spriteBatch.DrawString(SmallFont, uS, new Vector2(
-                shopRectangles[3].X + shopRectangles[0].Width + 16, shopRectangles[3].Y +
-                shopRectangles[3].Height / 2 - SmallFont.MeasureString(uS).Y / 2), Color.White);
-
+            
+                spriteBatch.DrawString(SmallFont, uS, new Vector2(1 +
+                    shopRectangles[3].X + shopRectangles[0].Width + 16, 1 + shopRectangles[3].Y +
+                    shopRectangles[3].Height / 2 - SmallFont.MeasureString(uS).Y / 2), Color.Black * 0.5f);
+                spriteBatch.DrawString(SmallFont, uS, new Vector2(
+                    shopRectangles[3].X + shopRectangles[0].Width + 16, shopRectangles[3].Y +
+                    shopRectangles[3].Height / 2 - SmallFont.MeasureString(uS).Y / 2), Color.White);
+            
             string credits = "Memecremental Game\nSpencer Chang     Ryan Niu";
             spriteBatch.DrawString(SmallFont, credits, new Vector2(64 + WINDOW_WIDTH - guiRectangles[2].Width, 652 - SmallFont.MeasureString(credits).Y / 2), Color.Black);
             string moneyText = money.ToString("C", new CultureInfo("en-US"));
