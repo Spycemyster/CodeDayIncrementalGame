@@ -104,10 +104,11 @@ namespace CodeDay_Project {
         /// Damages the enemy.
         /// </summary>
         /// <param name="amount"></param>
-        public override void Damage(float amount) {
+        public override void Damage(float amount)
+        {
             base.Damage(amount);
             isAttacked = true;
-            takeDamageSfx?.Play(0.2f, 0f, 0f);
+            takeDamageSfx?.Play(0.6f, 0f, 0f);
         }
 
         public void collision(List<Projectile> projectiles) {
