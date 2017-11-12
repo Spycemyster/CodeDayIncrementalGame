@@ -3,6 +3,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 
 namespace CodeDay_Project {
     /// <summary>
@@ -27,10 +28,13 @@ namespace CodeDay_Project {
         private Player player;
         private Texture2D abilityBorder;
         private Texture2D shopBorder, coinTexture;
-
+        private bool isDimmingUp;
+        private float dimTimer;
+        private float dimOpacity;
+        private const float DIM_INCREMENT = 0.05f;
         private Rectangle[] guiRectangles;
 
-        private Rectangle healthBar, manaBar, cHealthBar, cManaBar, coinRectangle;
+        private Rectangle healthBar, manaBar, cHealthBar, cManaBar, coinRectangle, eHealth, ecHealth;
 
         /// <summary>
         /// A blank static texture. 1x1 pixel
@@ -59,11 +63,13 @@ namespace CodeDay_Project {
 
         private List<Projectile> projectiles;
         private const int MAX_LENGTH = 400;
+        private const int MAX_LENGTH2 = 400;
         private Texture2D electricityProjectile, fireProjectile, iceProjectile, groundProjectile;
         private Texture2D[] backgrounds;
         private Enemy currentEnemy;
         private int floor = 1;
         private int currentBackground;
+        private bool hasChangedStances;
         private float money;
 
         public Game1() {
@@ -98,7 +104,8 @@ namespace CodeDay_Project {
         protected override void LoadContent() {
             // Create a new SpriteBatch, which can be used to draw textures.
             spriteBatch = new SpriteBatch(GraphicsDevice);
-
+            isDimmingUp = true;
+            hasChangedStances = false;
             Blank = Content.Load<Texture2D>("Blank");
             Font = Content.Load<SpriteFont>("Font");
             SmallFont = Content.Load<SpriteFont>("RegularFont");
@@ -133,7 +140,7 @@ namespace CodeDay_Project {
             player.CurrentMana = 50;
             player.MaxMana = 50;
             player.ManaRegen = 5;
-            player.StaffTexture = Content.Load<Texture2D>("resources/wizardAndStaff/wizard1");
+            player.HealthRegen = 10;
             abilityBorder = Content.Load<Texture2D>("resources/abilities/abilityBorder");
             shopBorder = Content.Load<Texture2D>("resources/backgrounds/shopBackground");
 
@@ -173,8 +180,9 @@ namespace CodeDay_Project {
             manaBar = new Rectangle(guiRectangles[0].X + border2, guiRectangles[0].Y + guiRectangles[0].Height - 14 - border2, MAX_LENGTH, 14);
             cHealthBar = new Rectangle(guiRectangles[0].X + border2, guiRectangles[0].Y + border2, MAX_LENGTH, 14);
             cManaBar = new Rectangle(guiRectangles[0].X + border2, guiRectangles[0].Y + guiRectangles[0].Height - 14 - border2, MAX_LENGTH, 14);
-            int height = (manaBar.Y + manaBar.Height) - healthBar.Y;
-            coinRectangle = new Rectangle((int)(healthBar.X + MAX_LENGTH + Font.MeasureString("100/100").X), healthBar.Y + height / 2, height, height);
+            eHealth = new Rectangle(guiRectangles[2].X - MAX_LENGTH2 - 16, healthBar.Y, MAX_LENGTH2, 14);
+            ecHealth = new Rectangle(guiRectangles[2].X - MAX_LENGTH2 - 16, healthBar.Y, MAX_LENGTH2, 14);
+            coinRectangle = new Rectangle(guiRectangles[2].X + 26, guiRectangles[2].Y + 48, 64, 64);
 
             for (int i = 0; i < abilities.Length; i++) {
                 int y = WINDOW_HEIGHT - WINDOW_HEIGHT / 4 + border;
@@ -183,6 +191,7 @@ namespace CodeDay_Project {
             }
             generateRandomEnemy(false);
             currentBackground = rand.Next(0, 2);
+            player.LoadContent(Content);
         }
 
         /// <summary>
@@ -201,90 +210,152 @@ namespace CodeDay_Project {
         protected override void Update(GameTime gameTime) {
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
-            player.Update(gameTime);
             int border2 = 12;
             float percentHealth = player.CurrentHealth / player.MaxHealth;
             float percentMana = player.CurrentMana / player.MaxMana;
+            float percentHealth2 = currentEnemy.CurrentHealth / currentEnemy.MaxHealth;
+            ecHealth = new Rectangle(guiRectangles[2].X - MAX_LENGTH2 - 16, healthBar.Y, (int)(MAX_LENGTH2 * percentHealth2), 14);
             cHealthBar = new Rectangle(guiRectangles[0].X + border2, guiRectangles[0].Y + border2, (int)(MAX_LENGTH * percentHealth), 14);
             cManaBar = new Rectangle(guiRectangles[0].X + border2, guiRectangles[0].Y + guiRectangles[0].Height - 14 - border2, (int)(MAX_LENGTH * percentMana), 14);
-            if (player.hasAttacked) {
-                Projectile p = new Projectile();
-                switch (type) {
-                    case ProjectileType.ELECTRICTY:
-                        p.Dimensions = new Point(120, 96);
-                        p.Position = new Vector2(223, 250);
-                        p.Texture = electricityProjectile;
-                        p.Velocity = new Vector2(10, 0);
-                        p.CollisionalDamage = player.AbilityPower * abilities[0].DamageScaling / 2;
-                        break;
-                    case ProjectileType.FIRE:
-                        p.Dimensions = new Point(128, 96);
-                        p.Position = new Vector2(223, 250);
-                        p.Texture = fireProjectile;
-                        p.Velocity = new Vector2(10, 0);
-                        p.CollisionalDamage = player.AbilityPower * abilities[1].DamageScaling / 2;
-                        break;
-                    case ProjectileType.GROUND:
-                        p.Dimensions = new Point(128, 96);
-                        p.Position = new Vector2(223, 250);
-                        p.Texture = groundProjectile;
-                        p.Velocity = new Vector2(10, 0);
-                        p.CollisionalDamage = player.AbilityPower * abilities[2].DamageScaling / 2;
-                        break;
-                    case ProjectileType.ICE:
-                        p.Dimensions = new Point(128, 96);
-                        p.Position = new Vector2(223, 250);
-                        p.Texture = iceProjectile;
-                        p.Velocity = new Vector2(10, 0);
-                        p.CollisionalDamage = player.AbilityPower * abilities[3].DamageScaling / 2;
-                        break;
-                }
-                projectiles.Add(p);
-                player.hasAttacked = false;
-            }
-            for (int i = 0; i < abilities.Length; i++) {
-                if (abilities[i] != null) {
-                    if (abilities[i].DrawRectangle.Contains(Mouse.GetState().Position) && InputManager.Instance.leftMouseButtonClicked() && player.CurrentMana >= abilities[i].Cost) {
-                        switch (i) {
-                            case 0:
-                                type = ProjectileType.ELECTRICTY;
-                                break;
-                            case 1:
-                                type = ProjectileType.FIRE;
-                                break;
-                            case 2:
-                                type = ProjectileType.ICE;
-                                break;
-                            case 3:
-                                type = ProjectileType.GROUND;
-                                break;
-                            case 4:
-                                break;
-                        }
-                        player.CurrentMana -= abilities[i].Cost;
-                        abilities[i].InflictOn(currentEnemy);
+            if (!player.isAlive)
+            {
+                dimTimer += (float)gameTime.ElapsedGameTime.TotalMilliseconds;
+                if (isDimmingUp)
+                {
+                    if (dimTimer >= 50f)
+                    {
+                        dimTimer = 0f;
+                        dimOpacity += DIM_INCREMENT;
                     }
-                    abilities[i].Update(gameTime);
+                    if (dimOpacity >= 1.0f)
+                    {
+                        floor = (floor - 1) / 10 * 10 + 1;
+                        generateRandomEnemy(floor % 10 == 0);
+                        player.CurrentHealth = player.MaxHealth;
+                        player.CurrentMana = player.MaxMana;
+                        projectiles.Clear();
+                        isDimmingUp = false;
+                    }
+                }
+                else
+                {
+                    if (dimTimer >= 50f)
+                    {
+                        dimOpacity -= DIM_INCREMENT;
+                        dimTimer = 0f;
+                    }
+                    if (dimOpacity <= 0f)
+                    {
+                        player.isAlive = true;
+                        isDimmingUp = true;
+                    }
                 }
             }
-            currentEnemy.Update(gameTime);
-            for (int i = 0; i < projectiles.Count; i++) {
-                Vector2 pos = new Vector2(223, 250);
-                if (projectiles[i].DrawRectangle.Intersects(currentEnemy.DrawRectangle)) {
-                    currentEnemy.Damage(projectiles[i].CollisionalDamage);
-                    projectiles.RemoveAt(i--);
+            else
+            {
+                player.Update(gameTime);
+                if (player.hasAttacked)
+                {
+                    Projectile p = new Projectile();
+                    float mult = (hasChangedStances ? 1.5f : 1);
+                    int mult2 = (hasChangedStances ? 2 : 1);
+                    switch (type)
+                    {
+                        case ProjectileType.ELECTRICTY:
+                            p.Dimensions = new Point(120 * mult2, 96 * mult2);
+                            p.Position = new Vector2(223 - (mult2 - 1) * 120, 250 - (mult2 - 1) * 60);
+                            p.Texture = electricityProjectile;
+                            p.Velocity = new Vector2(10, 0);
+                            p.CollisionalDamage = player.AbilityPower * abilities[0].DamageScaling * mult;
+                            break;
+                        case ProjectileType.FIRE:
+                            p.Dimensions = new Point(128 * mult2, 96 * mult2);
+                            p.Position = new Vector2(223 - (mult2 - 1) * 120, 250 - (mult2 - 1) * 60);
+                            p.Texture = fireProjectile;
+                            p.Velocity = new Vector2(10, 0);
+                            p.CollisionalDamage = player.AbilityPower * abilities[1].DamageScaling * mult;
+                            break;
+                        case ProjectileType.GROUND:
+                            p.Dimensions = new Point(128 * mult2, 96 * mult2);
+                            p.Position = new Vector2(223 - (mult2 - 1) * 120, 250 - (mult2 - 1) * 60);
+                            p.Texture = groundProjectile;
+                            p.Velocity = new Vector2(10, 0);
+                            p.CollisionalDamage = player.AbilityPower * abilities[2].DamageScaling * mult;
+                            break;
+                        case ProjectileType.ICE:
+                            p.Dimensions = new Point(128 * mult2, 96 * mult2);
+                            p.Position = new Vector2(223 - (mult2 - 1) * 120, 250 - (mult2 - 1) * 60);
+                            p.Texture = iceProjectile;
+                            p.Velocity = new Vector2(10, 0);
+                            p.CollisionalDamage = player.AbilityPower * abilities[3].DamageScaling * mult;
+                            break;
+                    }
+                    hasChangedStances = false;
+                    projectiles.Add(p);
+                    player.hasAttacked = false;
+                }
+                for (int i = 0; i < abilities.Length; i++)
+                {
+                    if (abilities[i] != null)
+                    {
+                        if (abilities[i].DrawRectangle.Contains(Mouse.GetState().Position) &&
+                            InputManager.Instance.leftMouseButtonClicked() && player.CurrentMana >= 
+                            abilities[i].Cost && abilities[i].Cooldown * 1000 <= abilities[i].Timer)
+                        {
+                            switch (i)
+                            {
+                                case 0:
+                                    type = ProjectileType.ELECTRICTY;
+                                    break;
+                                case 1:
+                                    type = ProjectileType.FIRE;
+                                    break;
+                                case 2:
+                                    type = ProjectileType.ICE;
+                                    break;
+                                case 3:
+                                    type = ProjectileType.GROUND;
+                                    break;
+                                case 4:
+                                    break;
+                            }
+                            hasChangedStances = true;
+                            player.CurrentMana -= abilities[i].Cost;
+                            abilities[i].InflictOn(currentEnemy);
+                        }
+                        abilities[i].Update(gameTime);
+                    }
+                }
+                currentEnemy.Update(gameTime);
+
+                if (player.isAlive)
+                {
+                    for (int i = 0; i < projectiles.Count; i++)
+                    {
+                        Vector2 pos = new Vector2(223, 250);
+                        if (projectiles[i].DrawRectangle.Intersects(currentEnemy.DrawRectangle))
+                        {
+                            currentEnemy.Damage(projectiles[i].CollisionalDamage);
+                            projectiles.RemoveAt(i--);
+                        }
+                    }
+                }
+
+                if (currentEnemy != null && !currentEnemy.isAlive)
+                {
+                    generateRandomEnemy(++floor % 10 == 0);
+                    money += 5 + (float)Math.Log10(floor + 1) * 10 * (((floor - 1) % 10) == 0 ? 10 : 1);
+
+                    if (floor % 10 == 1 && floor != 1)
+                        currentBackground = rand.Next(0, 3);
                 }
             }
 
-            if (currentEnemy != null && !currentEnemy.isAlive) {
-                generateRandomEnemy(++floor % 10 == 0);
-                money += (int)Math.Log10(floor + 1) * 10 * (((floor - 1) % 10) == 0 ? 10 : 1);
-                if (floor % 10 == 0)
-                    currentBackground = rand.Next(0, 3);
+            if (player.isAlive)
+            {
+                foreach (Projectile p in projectiles)
+                    p.Update(gameTime);
             }
-
-            foreach (Projectile p in projectiles)
-                p.Update(gameTime);
             InputManager.Instance.Update();
             base.Update(gameTime);
         }
@@ -304,6 +375,8 @@ namespace CodeDay_Project {
             foreach (Projectile p in projectiles)
                 p.Draw(spriteBatch);
             player.Draw(spriteBatch);
+            currentEnemy.Draw(spriteBatch);
+            spriteBatch.Draw(Blank, new Rectangle(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT), Color.Black * dimOpacity);
 
             // UI
             spriteBatch.DrawString(Font, "Floor " + floor, new Vector2(0, 0), Color.Black);
@@ -316,11 +389,16 @@ namespace CodeDay_Project {
             spriteBatch.Draw(Blank, guiRectangles[1], Color.LightGray);
             spriteBatch.Draw(abilityBorder, guiRectangles[1], Color.White);
             spriteBatch.Draw(shopBorder, guiRectangles[2], Color.White);
-            spriteBatch.Draw(Blank, healthBar, Color.Red * 0.4f);
+            spriteBatch.Draw(Blank, healthBar, Color.ForestGreen * 0.4f);
             spriteBatch.Draw(Blank, manaBar, Color.Blue * 0.4f);
             spriteBatch.Draw(Blank, cManaBar, Color.Blue);
-            spriteBatch.Draw(Blank, cHealthBar, Color.Red);
+            spriteBatch.Draw(Blank, cHealthBar, Color.ForestGreen);
+            spriteBatch.Draw(Blank, eHealth, Color.Red * 0.4f);
+            spriteBatch.Draw(Blank, ecHealth, Color.Red);
             spriteBatch.Draw(coinTexture, coinRectangle, Color.White);
+            string moneyText = money.ToString("C", new CultureInfo("en-US"));
+
+            spriteBatch.DrawString(SmallFont, moneyText, new Vector2(coinRectangle.X + coinRectangle.Width + 16, coinRectangle.Y + coinRectangle.Height / 2 - SmallFont.MeasureString(moneyText).Y / 2), Color.Black);
             string ch = (int)player.CurrentHealth + "/" + (int)player.MaxHealth;
             string cm = (int)player.CurrentMana + "/" + (int)player.MaxMana;
             spriteBatch.DrawString(SmallFont, ch, new Vector2(healthBar.X + healthBar.Width + 6, healthBar.Y + healthBar.Height / 2 - SmallFont.MeasureString(ch).Y / 2), Color.White);
@@ -349,7 +427,6 @@ namespace CodeDay_Project {
                     }
                 }
             }
-            currentEnemy.Draw(spriteBatch);
             spriteBatch.End();
 
             base.Draw(gameTime);
@@ -362,9 +439,9 @@ namespace CodeDay_Project {
             float scaleFact = Math.Min(currentEnemy.Texture.Height * 3, WINDOW_HEIGHT - WINDOW_HEIGHT / 4 - 60) / (currentEnemy.Texture.Height * 3f);
             currentEnemy.DrawRectangle = new Rectangle(guiRectangles[2].X - (int)(scaleFact * currentEnemy.Texture.Width * 3),
                 guiRectangles[0].Y - (int)(scaleFact * currentEnemy.Texture.Height * 3), (int)(scaleFact * currentEnemy.Texture.Width * 3), (int)(scaleFact * currentEnemy.Texture.Height * 3));
-            currentEnemy.AbilityPower = 3 * floor * (isBoss ? 10 : 1);
-            currentEnemy.CurrentHealth = 10 * floor * (isBoss ? 5 : 1);
-            currentEnemy.MaxHealth = 100 * floor * (isBoss ? 5 : 1);
+            currentEnemy.AbilityPower = 2 * (float)(Math.Log10(floor) + 1) * (isBoss ? 8 : 1);
+            currentEnemy.CurrentHealth = 10 * (float)(Math.Log10(floor) + 1) * (isBoss ? 5 : 1);
+            currentEnemy.MaxHealth = 10 * (float)(Math.Log10(floor) + 1) * (isBoss ? 5 : 1);
             currentEnemy.CurrentMana = 0;
             currentEnemy.MaxMana = 0;
             currentEnemy.Speed = 1500 * (isBoss ? 2f : 1);
@@ -415,6 +492,7 @@ namespace CodeDay_Project {
                     currentEnemy.Name = "Orcoblin";
                     break;
             }
+            player.CurrentEnemy = currentEnemy;
         }
     }
 }

@@ -89,7 +89,16 @@ namespace CodeDay_Project
         }
 
         /// <summary>
-        /// Current mana pool for the entity.
+        /// Health regen.
+        /// </summary>
+        public float HealthRegen
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// Mana regen.
         /// </summary>
         public float ManaRegen {
             get;

@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
+using Microsoft.Xna.Framework.Content;
 
 #endregion
 
@@ -25,14 +26,22 @@ namespace CodeDay_Project {
         /// <summary>
         /// The texture of the staff.
         /// </summary>
-        public Texture2D StaffTexture {
+        private Texture2D StaffTexture;
+
+        /// <summary>
+        /// The current enemy of the player.
+        /// </summary>
+        public Enemy CurrentEnemy
+        {
             get;
             set;
         }
 
+        private Texture2D ptsdTexture, naclTexture;
+
         private const int SCALE = 3;
         private float rotation;
-        private float animationTimer, attackTimer, damageTimer, manaTimer;
+        private float animationTimer, attackTimer, damageTimer, manaTimer, healthTimer;
         public bool isAttacking, isAttacked;
         public bool hasAttacked;
         #endregion
@@ -48,10 +57,23 @@ namespace CodeDay_Project {
             attackTimer = Speed / 2;
             hasAttacked = false;
             isAttacked = false;
+            isAlive = true;
         }
         #endregion
 
         #region Methods
+        /// <summary>
+        /// Loads the content.
+        /// </summary>
+        /// <param name="Content"></param>
+        public void LoadContent(ContentManager Content)
+        {
+            naclTexture = Content.Load<Texture2D>("resources/wizardAndStaff/wizard_0");
+            ptsdTexture = Content.Load<Texture2D>("resources/wizardAndStaff/wizard_1");
+            Texture = Content.Load<Texture2D>("resources/wizardAndStaff/wizard0");
+            StaffTexture = Content.Load<Texture2D>("resources/wizardAndStaff/wizard1");
+        }
+
         public override void Damage(float amount) {
             base.Damage(amount);
             isAttacked = true;
@@ -77,6 +99,13 @@ namespace CodeDay_Project {
             if (manaTimer >= 5000f / ManaRegen) {
                 manaTimer = 0f;
                 CurrentMana = Math.Min(MaxMana, CurrentMana + 1);
+            }
+
+            healthTimer += (float)gameTime.ElapsedGameTime.TotalMilliseconds;
+            if (healthTimer >= 5000f / HealthRegen)
+            {
+                healthTimer = 0f;
+                CurrentHealth = Math.Min(MaxHealth, CurrentHealth + 1);
             }
 
             if (isAttacking) {
@@ -117,7 +146,17 @@ namespace CodeDay_Project {
             if (isAttacked)
                 c = Color.Red;
             Vector2 staffOrigin = new Vector2(StaffTexture.Width / 2, StaffTexture.Height / 2);
-            spriteBatch.Draw(Texture, DrawRectangle, c);
+            Texture2D drawT = Texture;
+            Rectangle drawRectangle = DrawRectangle;
+            if (CurrentEnemy.Name.Equals("ACT") || !isAlive)
+                drawT = ptsdTexture;
+            else if (CurrentEnemy.Name.Equals("[BOSS] Skeet"))
+            {
+                drawT = naclTexture;
+                drawRectangle = new Rectangle(DrawRectangle.X, DrawRectangle.Y + DrawRectangle.Height - naclTexture.Height * 3, naclTexture.Width * 3, naclTexture.Height * 3);
+            }
+            
+            spriteBatch.Draw(drawT, drawRectangle, c);
             spriteBatch.Draw(StaffTexture, new Vector2(DrawRectangle.X + DrawRectangle.Width + StaffTexture.Width + 32,
                 DrawRectangle.Y + DrawRectangle.Height / 2), null, c, rotation, staffOrigin, SCALE, SpriteEffects.None, 0f);
         }
