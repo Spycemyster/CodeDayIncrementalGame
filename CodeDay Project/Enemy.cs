@@ -22,12 +22,11 @@ namespace CodeDay_Project {
     ///	</summary>
     public class Enemy : Entity {
         #region Fields
-        
+
         private const int SCALE = 3;
         private int offset;
-        private float animationTimer, attackTimer;
+        private float attackTimer;
         private bool isAttacked;
-        public bool isAttacking;
         public bool hasAttacked;
         private float damageTimer;
         private Player player;
@@ -40,9 +39,7 @@ namespace CodeDay_Project {
         public Enemy(float Speed, Player player) {
             this.player = player;
             this.Speed = Speed;
-            isAttacking = true;
-            animationTimer = attackTimer = 0f;
-            attackTimer = 0;
+            attackTimer = -100f;
             hasAttacked = false;
             isAlive = true;
             isAttacked = false;
@@ -50,9 +47,9 @@ namespace CodeDay_Project {
         #endregion
 
         #region Methods
-        public void Attack()
-        {
+        public void Attack() {
             player.Damage(AbilityPower);
+            hasAttacked = true;
         }
 
         /// <summary>
@@ -60,24 +57,17 @@ namespace CodeDay_Project {
         /// </summary>
         /// <param name="gameTime"></param>
         public override void Update(GameTime gameTime) {
-            if (isAttacking) {
-                attackTimer += (float)gameTime.ElapsedGameTime.TotalMilliseconds;
-                offset = 2 * -Math.Max((int)(32 * Math.Sin(attackTimer * (2 * Math.PI / Speed))) - 16,0);
-                if (attackTimer >= Speed) {
-                    Attack();
-                    attackTimer = 0f;
-                }
-            }
-            else {
-                offset = 0;
+            attackTimer += (float)gameTime.ElapsedGameTime.TotalMilliseconds;
+            offset = 2 * -Math.Max((int)(32 * Math.Sin(attackTimer * (2 * Math.PI / Speed))) - 16, 0);
+            if (!hasAttacked && offset < -16) Attack();
+            if (attackTimer >= Speed) {
                 attackTimer = 0f;
+                hasAttacked = false;
             }
 
-            if (isAttacked)
-            {
+            if (isAttacked) {
                 damageTimer += (float)gameTime.ElapsedGameTime.TotalMilliseconds;
-                if (damageTimer >= 100f)
-                {
+                if (damageTimer >= 100f) {
                     isAttacked = false;
                     damageTimer = 0f;
                 }
@@ -101,8 +91,7 @@ namespace CodeDay_Project {
         /// Damages the enemy.
         /// </summary>
         /// <param name="amount"></param>
-        public override void Damage(float amount)
-        {
+        public override void Damage(float amount) {
             base.Damage(amount);
             isAttacked = true;
         }
