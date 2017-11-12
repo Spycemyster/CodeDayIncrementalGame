@@ -69,8 +69,8 @@ namespace CodeDay_Project {
         private Enemy currentEnemy;
         private int floor = 1;
         private int currentBackground;
-        private bool hasChangedStances;
-        private float money;
+        private bool hasChangedStances, selfBuffActive;
+        private float money, selfBuffTimer;
 
         public Game1() {
             graphics = new GraphicsDeviceManager(this);
@@ -104,6 +104,8 @@ namespace CodeDay_Project {
         protected override void LoadContent() {
             // Create a new SpriteBatch, which can be used to draw textures.
             spriteBatch = new SpriteBatch(GraphicsDevice);
+            selfBuffActive = false;
+            selfBuffTimer = 0f;
             isDimmingUp = true;
             hasChangedStances = false;
             Blank = Content.Load<Texture2D>("Blank");
@@ -167,8 +169,8 @@ namespace CodeDay_Project {
             abilities[3].Texture = Content.Load<Texture2D>("resources/abilities/ability_3");
             abilities[4] = new Ability(player, 15, 0.95f);
             abilities[4].Cost = 5;
-            abilities[4].Cooldown = 10f;
-            abilities[4].Timer = 10000f;
+            abilities[4].Cooldown = 15f;
+            abilities[4].Timer = 15000f;
             abilities[4].Texture = Content.Load<Texture2D>("resources/abilities/ability_4");
 
             int width = WINDOW_WIDTH - WINDOW_WIDTH * 2 / 7;
@@ -210,13 +212,26 @@ namespace CodeDay_Project {
         protected override void Update(GameTime gameTime) {
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
+            player.HasActiveBuff = selfBuffActive;
             int border2 = 12;
             float percentHealth = player.CurrentHealth / player.MaxHealth;
             float percentMana = player.CurrentMana / player.MaxMana;
             float percentHealth2 = currentEnemy.CurrentHealth / currentEnemy.MaxHealth;
             ecHealth = new Rectangle(guiRectangles[2].X - MAX_LENGTH2 - 16, healthBar.Y, (int)(MAX_LENGTH2 * percentHealth2), 14);
             cHealthBar = new Rectangle(guiRectangles[0].X + border2, guiRectangles[0].Y + border2, (int)(MAX_LENGTH * percentHealth), 14);
-            cManaBar = new Rectangle(guiRectangles[0].X + border2, guiRectangles[0].Y + guiRectangles[0].Height - 14 - border2, (int)(MAX_LENGTH * percentMana), 14);
+            cManaBar = new Rectangle(guiRectangles[0].X + border2, guiRectangles[0].Y + guiRectangles[0].Height - 14 - border2,
+                (int)(MAX_LENGTH * percentMana), 14);
+
+            if (selfBuffActive)
+            {
+                selfBuffTimer += (float)gameTime.ElapsedGameTime.TotalMilliseconds;
+                if (selfBuffTimer >= 8000f)
+                {
+                    selfBuffTimer = 0f;
+                    selfBuffActive = false;
+                }
+            }
+
             if (!player.isAlive)
             {
                 dimTimer += (float)gameTime.ElapsedGameTime.TotalMilliseconds;
@@ -317,9 +332,11 @@ namespace CodeDay_Project {
                                     type = ProjectileType.GROUND;
                                     break;
                                 case 4:
+                                    selfBuffActive = true;
                                     break;
                             }
-                            hasChangedStances = true;
+                            if (i != 4)
+                                hasChangedStances = true;
                             player.CurrentMana -= abilities[i].Cost;
                             abilities[i].InflictOn(currentEnemy);
                         }

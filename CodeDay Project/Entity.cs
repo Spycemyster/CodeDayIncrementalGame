@@ -180,7 +180,7 @@ namespace CodeDay_Project
         /// Loads the assets for the entity.
         /// </summary>
         /// <param name="Content"></param>
-        public void LoadContent(ContentManager Content)
+        public virtual void LoadContent(ContentManager Content)
         {
 
         }
