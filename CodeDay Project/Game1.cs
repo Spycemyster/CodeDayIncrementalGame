@@ -1,4 +1,5 @@
 ﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Media;
@@ -55,7 +56,7 @@ namespace CodeDay_Project {
         private Rectangle healthBar, manaBar, cHealthBar, cManaBar, coinRectangle, eHealth, ecHealth;
         private Song currentSong;
         private Song[] songs;
-
+        private SoundEffect selfSfx, superSfx;
         /// <summary>
         /// A blank static texture. 1x1 pixel
         /// </summary>
@@ -135,6 +136,8 @@ namespace CodeDay_Project {
             Blank = Content.Load<Texture2D>("Blank");
             Font = Content.Load<SpriteFont>("Font");
             SmallFont = Content.Load<SpriteFont>("RegularFont");
+            superSfx = Content.Load<SoundEffect>("resources/SFX/superAbility");
+            selfSfx = Content.Load<SoundEffect>("resources/SFX/selfBuff");
             songs = new Song[3];
             for (int i = 0; i < songs.Length; i++)
                 songs[i] = Content.Load<Song>("resources/bgm/Stage " + i);
@@ -428,20 +431,26 @@ namespace CodeDay_Project {
                             {
                                 case 0:
                                     type = ProjectileType.ELECTRICTY;
+                                    superSfx.Play(0.6f, 0f, 0f);
                                     break;
                                 case 1:
                                     type = ProjectileType.FIRE;
+                                    superSfx.Play(0.65f, 0f, 0f);
                                     break;
                                 case 2:
                                     type = ProjectileType.ICE;
+                                    superSfx.Play(0.7f, 0f, 0f);
                                     break;
                                 case 3:
                                     type = ProjectileType.GROUND;
+                                    superSfx.Play(0.75f, 0f, 0f);
                                     break;
                                 case 4:
+                                    selfSfx.Play(0.9f, 0f, 0f);
                                     selfBuffActive = true;
                                     break;
                                 case 5:
+                                    selfSfx.Play(0.9f, 0f, 0f);
                                     player.CurrentHealth = Math.Min(player.MaxHealth, player.CurrentHealth + player.AbilityPower);
                                     break;
                             }
@@ -539,8 +548,8 @@ namespace CodeDay_Project {
                 if (shopColors[i] != Color.White)
                 {
                     string text = shopCosts[i].ToString("C", new CultureInfo("en-US"));
-                    spriteBatch.DrawString(SmallFont, text, Mouse.GetState().Position.ToVector2() + new Vector2(1, 1), Color.Black * 0.6f);
-                    spriteBatch.DrawString(SmallFont, text, Mouse.GetState().Position.ToVector2(), Color.White);
+                    spriteBatch.DrawString(SmallFont, text, Mouse.GetState().Position.ToVector2() + new Vector2(10, 12) + new Vector2(1, 1), Color.Black * 0.6f);
+                    spriteBatch.DrawString(SmallFont, text, Mouse.GetState().Position.ToVector2() + new Vector2(10, 12), Color.White);
                 }
             }
             string uH = "Upgrade Health";
@@ -583,13 +592,17 @@ namespace CodeDay_Project {
             spriteBatch.DrawString(SmallFont, cm, new Vector2(manaBar.X + manaBar.Width + 6, manaBar.Y + manaBar.Height / 2 - SmallFont.MeasureString(cm).Y / 2), Color.White);
 
             for (int i = 0; i < abilities.Length; i++) {
-                if (abilities[i] != null) {
+                if (abilities[i] != null)
+                {
                     Color c = Color.White;
                     float ability = 0f;
                     Rectangle rect = abilities[i].DrawRectangle;
                     if (rect.Contains(Mouse.GetState().Position))
+                    {
                         c = Color.LightGray;
-                    if (abilities[i].Timer < abilities[i].Cooldown * 1000f) {
+                    }
+                    if (abilities[i].Timer < abilities[i].Cooldown * 1000f)
+                    {
                         c = Color.Gray;
                         ability = abilities[i].Timer / 1000f;
 
@@ -597,12 +610,31 @@ namespace CodeDay_Project {
                             c = Color.DarkGray;
                     }
                     spriteBatch.Draw(abilities[i].Texture, rect, c);
-                    if (abilities[i].Timer < abilities[i].Cooldown * 1000f) {
+                    if (abilities[i].Timer < abilities[i].Cooldown * 1000f)
+                    {
                         string text = "" + (int)(abilities[i].Cooldown - ability + 1);
                         spriteBatch.DrawString(Font, text,
                             new Vector2(rect.X + rect.Width / 2 - Font.MeasureString(text).X / 2,
                             rect.Y + rect.Height / 2 - Font.MeasureString(text).Y / 2), Color.LightGray);
+
+
                     }
+
+                    
+                }
+            }
+            for (int j = 0; j < abilities.Length; j++)
+            {
+                if (abilities[j] != null)
+                {
+                    Rectangle rectangle = abilities[j].DrawRectangle;
+                    if (rectangle.Contains(Mouse.GetState().Position))
+                    {
+                        string desc = "Mana Cost: " + abilities[j].Cost;
+                        spriteBatch.DrawString(SmallFont, desc, Mouse.GetState().Position.ToVector2() + new Vector2(10, 12) + new Vector2(1, 1), Color.Black * 0.6f);
+                        spriteBatch.DrawString(SmallFont, desc, Mouse.GetState().Position.ToVector2() + new Vector2(10, 12), Color.White);
+                    }
+
                 }
             }
             spriteBatch.End();

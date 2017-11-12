@@ -62,7 +62,7 @@ namespace CodeDay_Project {
         public void Attack() {
             player.Damage(AbilityPower);
             hasAttacked = true;
-            dootSfx?.Play(0.9f, 0f, 0f);
+            dootSfx?.Play(0.6f, 0f, 0f);
         }
 
         /// <summary>
@@ -107,7 +107,7 @@ namespace CodeDay_Project {
         public override void Damage(float amount) {
             base.Damage(amount);
             isAttacked = true;
-            takeDamageSfx?.Play(0.25f, 0f, 0f);
+            takeDamageSfx?.Play(0.2f, 0f, 0f);
         }
 
         public void collision(List<Projectile> projectiles) {
