@@ -28,7 +28,7 @@ namespace CodeDay_Project
         private Texture2D abilityBorder;
         private Rectangle[] guiRectangles;
 
-        private Rectangle healthBar, manaBar;
+        private Rectangle healthBar, manaBar, cHealthBar, cManaBar;
 
         /// <summary>
         /// A blank static texture. 1x1 pixel
@@ -39,6 +39,11 @@ namespace CodeDay_Project
         /// The default font for all text.
         /// </summary>
         public static SpriteFont Font;
+
+        /// <summary>
+        /// The default small font for all text.
+        /// </summary>
+        public static SpriteFont SmallFont;
 
         /// <summary>
         /// Width dimension for the window.
@@ -91,6 +96,7 @@ namespace CodeDay_Project
             
             Blank = Content.Load<Texture2D>("Blank");
             Font = Content.Load<SpriteFont>("Font");
+            SmallFont = Content.Load<SpriteFont>("RegularFont");
 
             projectiles = new List<Projectile>();
 
@@ -142,9 +148,12 @@ namespace CodeDay_Project
             int width = WINDOW_WIDTH - WINDOW_WIDTH * 2 / 7;
             int border = 32;
             int iconWidth = (width - border * 6) / 5 - border;
+            int border2 = 12;
 
-            healthBar = new Rectangle(guiRectangles[0].X + border, guiRectangles[0].Y + border, MAX_LENGTH, 24);
-            manaBar = new Rectangle(guiRectangles[0].X + border, guiRectangles[0].Y - guiRectangles[0].Height - border, MAX_LENGTH, 24);
+            healthBar = new Rectangle(guiRectangles[0].X + border2, guiRectangles[0].Y + border2, MAX_LENGTH, 14);
+            manaBar = new Rectangle(guiRectangles[0].X + border2, guiRectangles[0].Y + guiRectangles[0].Height - 14 - border2, MAX_LENGTH, 14);
+            cHealthBar = new Rectangle(guiRectangles[0].X + border2, guiRectangles[0].Y + border2, MAX_LENGTH, 14);
+            cManaBar = new Rectangle(guiRectangles[0].X + border2, guiRectangles[0].Y + guiRectangles[0].Height - 14 - border2, MAX_LENGTH, 14);
 
             for (int i = 0; i < abilities.Length; i++)
             {
@@ -173,6 +182,10 @@ namespace CodeDay_Project
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
             player.Update(gameTime);
+            int border2 = 12;
+            float percentHealth = player.CurrentHealth / player.MaxHealth;
+            cHealthBar = new Rectangle(guiRectangles[0].X + border2, guiRectangles[0].Y + border2, (int)(MAX_LENGTH * percentHealth), 14);
+            cManaBar = new Rectangle(guiRectangles[0].X + border2, guiRectangles[0].Y + guiRectangles[0].Height - 14 - border2, (int)(MAX_LENGTH * percentHealth), 14);
             if (player.hasAttacked)
             {
                 Projectile p = new Projectile();
@@ -267,8 +280,14 @@ namespace CodeDay_Project
             spriteBatch.Draw(Blank, guiRectangles[1], Color.LightGray);
             spriteBatch.Draw(abilityBorder, guiRectangles[1], Color.White);
             spriteBatch.Draw(Blank, guiRectangles[2], Color.White);
-            spriteBatch.Draw(Blank, healthBar, Color.Red);
-            spriteBatch.Draw(Blank, manaBar, Color.Blue);
+            spriteBatch.Draw(Blank, healthBar, Color.Red * 0.4f);
+            spriteBatch.Draw(Blank, manaBar, Color.Blue * 0.4f);
+            spriteBatch.Draw(Blank, cManaBar, Color.Blue);
+            spriteBatch.Draw(Blank, cHealthBar, Color.Red);
+            string ch = (int)player.CurrentHealth + "/" + (int)player.MaxHealth;
+            string cm = (int)player.CurrentMana + "/" + (int)player.MaxMana;
+            spriteBatch.DrawString(SmallFont, ch, new Vector2(healthBar.X + healthBar.Width + 6, healthBar.Y + healthBar.Height / 2 - SmallFont.MeasureString(ch).Y / 2), Color.White);
+            spriteBatch.DrawString(SmallFont, cm, new Vector2(manaBar.X + manaBar.Width + 6, manaBar.Y + manaBar.Height / 2 - SmallFont.MeasureString(cm).Y / 2), Color.White);
 
             for (int i = 0; i < abilities.Length; i++)
             {

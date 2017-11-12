@@ -416,3 +416,10 @@
 /processorParam:TextureFormat=Color
 /build:resources/particles/particle_8.png
 
+#begin RegularFont.spritefont
+/importer:FontDescriptionImporter
+/processor:FontDescriptionProcessor
+/processorParam:PremultiplyAlpha=True
+/processorParam:TextureFormat=Compressed
+/build:RegularFont.spritefont
+
