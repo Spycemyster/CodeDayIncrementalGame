@@ -140,7 +140,7 @@ namespace CodeDay_Project
         /// Deals an amount of raw damage.
         /// </summary>
         /// <param name="amount"></param>
-        public void Damage(float amount)
+        public virtual void Damage(float amount)
         {
             CurrentHealth -= amount * (10 / (10 + Defense));
 

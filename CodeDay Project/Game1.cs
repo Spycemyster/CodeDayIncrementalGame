@@ -57,8 +57,10 @@ namespace CodeDay_Project {
         private List<Projectile> projectiles;
         private const int MAX_LENGTH = 400;
         private Texture2D electricityProjectile, fireProjectile, iceProjectile, groundProjectile;
+        private Texture2D[] backgrounds;
         private Enemy currentEnemy;
-        private int floor = 0;
+        private int floor = 1;
+        private int currentBackground;
 
         public Game1() {
             graphics = new GraphicsDeviceManager(this);
@@ -96,6 +98,10 @@ namespace CodeDay_Project {
             Blank = Content.Load<Texture2D>("Blank");
             Font = Content.Load<SpriteFont>("Font");
             SmallFont = Content.Load<SpriteFont>("RegularFont");
+            backgrounds = new Texture2D[3];
+            backgrounds[0] = Content.Load<Texture2D>("resources/backgrounds/inside");
+            backgrounds[1] = Content.Load<Texture2D>("resources/backgrounds/outside");
+            backgrounds[2] = Content.Load<Texture2D>("resources/backgrounds/space");
 
             projectiles = new List<Projectile>();
 
@@ -159,8 +165,8 @@ namespace CodeDay_Project {
                 int x = (iconWidth + border) * i + border;
                 abilities[i].DrawRectangle = new Rectangle(x, y, iconWidth, iconWidth);
             }
-
-            generateRandomEnemy(floor % 10 == 0);
+            generateRandomEnemy(false);
+            currentBackground = rand.Next(0, 2);
         }
 
         /// <summary>
@@ -182,8 +188,9 @@ namespace CodeDay_Project {
             player.Update(gameTime);
             int border2 = 12;
             float percentHealth = player.CurrentHealth / player.MaxHealth;
+            float percentMana = player.CurrentMana / player.MaxMana;
             cHealthBar = new Rectangle(guiRectangles[0].X + border2, guiRectangles[0].Y + border2, (int)(MAX_LENGTH * percentHealth), 14);
-            cManaBar = new Rectangle(guiRectangles[0].X + border2, guiRectangles[0].Y + guiRectangles[0].Height - 14 - border2, (int)(MAX_LENGTH * percentHealth), 14);
+            cManaBar = new Rectangle(guiRectangles[0].X + border2, guiRectangles[0].Y + guiRectangles[0].Height - 14 - border2, (int)(MAX_LENGTH * percentMana), 14);
             if (player.hasAttacked) {
                 Projectile p = new Projectile();
                 switch (type) {
@@ -192,24 +199,28 @@ namespace CodeDay_Project {
                         p.Position = new Vector2(223, 250);
                         p.Texture = electricityProjectile;
                         p.Velocity = new Vector2(10, 0);
+                        p.CollisionalDamage = player.AbilityPower * abilities[0].DamageScaling / 2;
                         break;
                     case ProjectileType.FIRE:
                         p.Dimensions = new Point(128, 96);
                         p.Position = new Vector2(223, 250);
                         p.Texture = fireProjectile;
                         p.Velocity = new Vector2(10, 0);
+                        p.CollisionalDamage = player.AbilityPower * abilities[1].DamageScaling / 2;
                         break;
                     case ProjectileType.GROUND:
                         p.Dimensions = new Point(128, 96);
                         p.Position = new Vector2(223, 250);
                         p.Texture = groundProjectile;
                         p.Velocity = new Vector2(10, 0);
+                        p.CollisionalDamage = player.AbilityPower * abilities[2].DamageScaling / 2;
                         break;
                     case ProjectileType.ICE:
                         p.Dimensions = new Point(128, 96);
                         p.Position = new Vector2(223, 250);
                         p.Texture = iceProjectile;
                         p.Velocity = new Vector2(10, 0);
+                        p.CollisionalDamage = player.AbilityPower * abilities[3].DamageScaling / 2;
                         break;
                 }
                 projectiles.Add(p);
@@ -232,16 +243,27 @@ namespace CodeDay_Project {
                                 type = ProjectileType.GROUND;
                                 break;
                         }
-                        abilities[i].InflictOn(null);
+                        abilities[i].InflictOn(currentEnemy);
                     }
                     abilities[i].Update(gameTime);
                 }
             }
-
+            currentEnemy.Update(gameTime);
             for (int i = 0; i < projectiles.Count; i++) {
                 Vector2 pos = new Vector2(223, 250);
-                if (Vector2.Distance(projectiles[i].Position, pos) > 500f)
+                if (projectiles[i].DrawRectangle.Intersects(currentEnemy.DrawRectangle))
+                {
+                    currentEnemy.Damage(projectiles[i].CollisionalDamage);
                     projectiles.RemoveAt(i--);
+                }
+            }
+
+            if (currentEnemy != null && !currentEnemy.isAlive)
+            {
+                generateRandomEnemy(++floor % 10 == 0);
+
+                if (floor % 10 == 0)
+                    currentBackground = rand.Next(0, 2);
             }
 
             foreach (Projectile p in projectiles)
@@ -259,6 +281,7 @@ namespace CodeDay_Project {
 
             spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
                 SamplerState.PointClamp, null, null, null, null);
+            spriteBatch.Draw(backgrounds[currentBackground], new Rectangle(0, 0, backgrounds[currentBackground].Width, backgrounds[currentBackground].Height), Color.White);
 
             // players and entities
             foreach (Projectile p in projectiles)
@@ -266,6 +289,8 @@ namespace CodeDay_Project {
             player.Draw(spriteBatch);
 
             // UI
+            spriteBatch.DrawString(Font, "Floor " + floor, new Vector2(0, 0), Color.Black);
+            //spriteBatch.DrawString(Font, "Floor " + floor, new Vector2(WINDOW_WIDTH - WINDOW_WIDTH / 7 - Font.MeasureString("Floor" + floor).X / 2, 16), Color.Black);
             spriteBatch.Draw(Blank, guiRectangles[0], Color.Gray);
             spriteBatch.Draw(Blank, guiRectangles[1], Color.LightGray);
             spriteBatch.Draw(abilityBorder, guiRectangles[1], Color.White);
@@ -302,7 +327,7 @@ namespace CodeDay_Project {
                     }
                 }
             }
-            currentEnemy.Draw(spriteBatch);
+            currentEnemy?.Draw(spriteBatch);
             spriteBatch.End();
 
             base.Draw(gameTime);
@@ -310,16 +335,17 @@ namespace CodeDay_Project {
 
         protected void generateRandomEnemy(bool isBoss) {
             int r = rand.Next(isBoss ? 0 : 5, isBoss ? 5 : 15);
-            currentEnemy = new Enemy(500f);
+            currentEnemy = new Enemy(500f, player);
             currentEnemy.Texture = Content.Load<Texture2D>("resources/EnemiesAndBosses/enemy_" + (r < 10 ? "0" + r : "" + r));
-            float xScale = 0;
-            float yScale = 0;
-            currentEnemy.DrawRectangle = new Rectangle(guiRectangles[2].X - currentEnemy.Texture.Width * 3, guiRectangles[0].Y - currentEnemy.Texture.Height * 3, currentEnemy.Texture.Width * 3, currentEnemy.Texture.Height * 3);
-            currentEnemy.AbilityPower = 10 * floor * (isBoss ? 10 : 1);
-            currentEnemy.CurrentHealth = 100 * floor * (isBoss ? 10 : 1);
+            float scaleFact = Math.Min(currentEnemy.Texture.Height * 3, WINDOW_HEIGHT - WINDOW_HEIGHT / 4 - 60) / (currentEnemy.Texture.Height * 3f);
+            currentEnemy.DrawRectangle = new Rectangle(guiRectangles[2].X - (int)(scaleFact * currentEnemy.Texture.Width * 3),
+                guiRectangles[0].Y - (int)(scaleFact * currentEnemy.Texture.Height * 3), (int)(scaleFact * currentEnemy.Texture.Width * 3), (int)(scaleFact * currentEnemy.Texture.Height * 3));
+            currentEnemy.AbilityPower = Math.Max(1, 2 * floor * (isBoss ? 10 : 1));
+            currentEnemy.CurrentHealth = 10 * floor * (isBoss ? 10 : 1);
             currentEnemy.MaxHealth = 100 * floor * (isBoss ? 10 : 1);
             currentEnemy.CurrentMana = 0;
             currentEnemy.MaxMana = 0;
+            currentEnemy.Speed = 1500f;
         }
     }
 }

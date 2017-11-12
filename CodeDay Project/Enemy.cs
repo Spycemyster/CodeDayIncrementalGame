@@ -26,26 +26,33 @@ namespace CodeDay_Project {
         private const int SCALE = 3;
         private int offset;
         private float animationTimer, attackTimer;
+        private bool isAttacked;
         public bool isAttacking;
         public bool hasAttacked;
+        private float damageTimer;
+        private Player player;
         #endregion
 
         #region Constructor
         ///	<summary>
         ///	Creates a new instance of <c>Enemy</c>.
         ///	</summary>
-        public Enemy(float Speed) {
+        public Enemy(float Speed, Player player) {
+            this.player = player;
             this.Speed = Speed;
-            isAttacking = false;
+            isAttacking = true;
             animationTimer = attackTimer = 0f;
-            attackTimer = Speed / 2;
+            attackTimer = 0;
             hasAttacked = false;
+            isAlive = true;
+            isAttacked = false;
         }
         #endregion
 
         #region Methods
-        public void Attack() {
-            hasAttacked = true;
+        public void Attack()
+        {
+            player.Damage(AbilityPower);
         }
 
         /// <summary>
@@ -55,8 +62,7 @@ namespace CodeDay_Project {
         public override void Update(GameTime gameTime) {
             if (isAttacking) {
                 attackTimer += (float)gameTime.ElapsedGameTime.TotalMilliseconds;
-                animationTimer += (float)gameTime.ElapsedGameTime.TotalMilliseconds;
-                offset = Math.Max((int)(32 * Math.Cos(animationTimer * (2 * Math.PI / Speed))) - 16,0);
+                offset = 2 * -Math.Max((int)(32 * Math.Sin(attackTimer * (2 * Math.PI / Speed))) - 16,0);
                 if (attackTimer >= Speed) {
                     Attack();
                     attackTimer = 0f;
@@ -64,11 +70,18 @@ namespace CodeDay_Project {
             }
             else {
                 offset = 0;
-                animationTimer = 0;
+                attackTimer = 0f;
             }
-            
-            if (InputManager.Instance.KeyPressed(Keys.P))
-                isAttacking = !isAttacking;
+
+            if (isAttacked)
+            {
+                damageTimer += (float)gameTime.ElapsedGameTime.TotalMilliseconds;
+                if (damageTimer >= 100f)
+                {
+                    isAttacked = false;
+                    damageTimer = 0f;
+                }
+            }
             base.Update(gameTime);
         }
 
@@ -78,7 +91,20 @@ namespace CodeDay_Project {
         /// <param name="spriteBatch"></param>
         public override void Draw(SpriteBatch spriteBatch) {
             base.Draw(spriteBatch);
-            spriteBatch.Draw(Texture, new Rectangle(DrawRectangle.X, DrawRectangle.Y + offset, DrawRectangle.Width, DrawRectangle.Height), Color.White);
+            Color c = Color.White;
+            if (isAttacked)
+                c = Color.Red;
+            spriteBatch.Draw(Texture, new Rectangle(DrawRectangle.X + offset, DrawRectangle.Y, DrawRectangle.Width, DrawRectangle.Height), c);
+        }
+
+        /// <summary>
+        /// Damages the enemy.
+        /// </summary>
+        /// <param name="amount"></param>
+        public override void Damage(float amount)
+        {
+            base.Damage(amount);
+            isAttacked = true;
         }
 
         public void collision(List<Projectile> projectiles) {

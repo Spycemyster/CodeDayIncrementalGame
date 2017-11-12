@@ -35,8 +35,8 @@ namespace CodeDay_Project
 
         private const int SCALE = 3;
         private float rotation;
-        private float animationTimer, attackTimer;
-        public bool isAttacking;
+        private float animationTimer, attackTimer, damageTimer;
+        public bool isAttacking, isAttacked;
         public bool hasAttacked;
         #endregion
 
@@ -47,14 +47,21 @@ namespace CodeDay_Project
         public Player(float Speed)
         {
             this.Speed = Speed;
-            isAttacking = false;
+            isAttacking = true;
             animationTimer = attackTimer = 0f;
             attackTimer = Speed / 2;
             hasAttacked = false;
+            isAttacked = false;
         }
         #endregion
 
         #region Methods
+        public override void Damage(float amount)
+        {
+            base.Damage(amount);
+            isAttacked = true;
+        }
+
         /// <summary>
         /// Levels up the character's stats.
         /// </summary>
@@ -91,8 +98,19 @@ namespace CodeDay_Project
                 animationTimer = 0;
             }
 
-            if (InputManager.Instance.KeyPressed(Keys.P))
-                isAttacking = !isAttacking;
+            if (isAttacked)
+            {
+                damageTimer += (float)gameTime.ElapsedGameTime.TotalMilliseconds;
+
+                if (damageTimer >= 100f)
+                {
+                    damageTimer = 0f;
+                    isAttacked = false;
+                }
+            }
+
+            //if (InputManager.Instance.KeyPressed(Keys.P))
+            //    isAttacking = !isAttacking;
             base.Update(gameTime);
         }
 
@@ -103,10 +121,13 @@ namespace CodeDay_Project
         public override void Draw(SpriteBatch spriteBatch)
         {
             base.Draw(spriteBatch);
+            Color c = Color.White;
+            if (isAttacked)
+                c = Color.Red;
             Vector2 staffOrigin = new Vector2(StaffTexture.Width / 2, StaffTexture.Height / 2);
-            spriteBatch.Draw(Texture, DrawRectangle, Color.White);
+            spriteBatch.Draw(Texture, DrawRectangle, c);
             spriteBatch.Draw(StaffTexture, new Vector2(DrawRectangle.X + DrawRectangle.Width + StaffTexture.Width + 32,
-                DrawRectangle.Y + DrawRectangle.Height / 2), null, Color.White, rotation, staffOrigin, SCALE, SpriteEffects.None, 0f);
+                DrawRectangle.Y + DrawRectangle.Height / 2), null, c, rotation, staffOrigin, SCALE, SpriteEffects.None, 0f);
         }
         #endregion
     }
