@@ -106,6 +106,24 @@ namespace CodeDay_Project
             get;
             set;
         }
+
+        /// <summary>
+        /// Whether the entity is alive or not.
+        /// </summary>
+        public bool isAlive
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// The level of the entity.
+        /// </summary>
+        public int Level
+        {
+            get;
+            set;
+        }
         #endregion
 
         #region Constructor
@@ -129,6 +147,7 @@ namespace CodeDay_Project
             if (CurrentHealth <= 0)
             {
                 // DIE
+                isAlive = false;
             }
         }
         /// <summary>
