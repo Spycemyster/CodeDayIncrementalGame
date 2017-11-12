@@ -18,7 +18,7 @@ using System.Threading.Tasks;
 namespace CodeDay_Project
 {
     ///	<summary>
-    ///	
+    ///	An ability that the player uses.
     ///	</summary>
     public class Ability
     {
@@ -66,6 +66,15 @@ namespace CodeDay_Project
         }
 
         /// <summary>
+        /// The rectangle that the ability is drawn in.
+        /// </summary>
+        public Rectangle DrawRectangle
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
         /// The cost of this ability
         /// </summary>
         public readonly float ManaCost;
@@ -79,6 +88,14 @@ namespace CodeDay_Project
         /// The scaling of the ability.
         /// </summary>
         public readonly float DamageScaling;
+
+        private AbilityArg arg;
+
+        /// <summary>
+        /// Delegate handler for ability events.
+        /// </summary>
+        /// <param name="arg"></param>
+        public delegate void AbilityEvent(AbilityArg arg);
         #endregion
 
         #region Constructor
@@ -87,6 +104,7 @@ namespace CodeDay_Project
         ///	</summary>
         public Ability(Entity caster, float cost, float scalings)
         {
+            arg = new AbilityArg(this);
             holder = caster;
             ManaCost = cost;
             DamageScaling = scalings;
@@ -115,5 +133,15 @@ namespace CodeDay_Project
             Timer = 0f;
         }
         #endregion
+    }
+
+    public class AbilityArg
+    {
+        public readonly Ability Ability;
+
+        public AbilityArg(Ability a)
+        {
+            Ability = a;
+        }
     }
 }

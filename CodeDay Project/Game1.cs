@@ -1,6 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using System.Collections.Generic;
 
 namespace CodeDay_Project
 {
@@ -16,6 +17,8 @@ namespace CodeDay_Project
 
         private Ability[] abilities; //electricity, fire, ice, earth;
         private Player player;
+        private Texture2D abilityBorder;
+        private Rectangle[] guiRectangles;
 
         /// <summary>
         /// A blank static texture. 1x1 pixel
@@ -36,6 +39,9 @@ namespace CodeDay_Project
         /// Height dimension for the window.
         /// </summary>
         public const int WINDOW_HEIGHT = 720;
+
+        private List<Projectile> projectiles;
+        private Texture2D electricityProjectile, fireProjectile;
 
         public Game1()
         {
@@ -76,18 +82,58 @@ namespace CodeDay_Project
             Blank = Content.Load<Texture2D>("Blank");
             Font = Content.Load<SpriteFont>("Font");
 
-            player = new Player();
+            projectiles = new List<Projectile>();
+
+            guiRectangles = new Rectangle[3];
+            guiRectangles[0] = new Rectangle(0, WINDOW_HEIGHT - WINDOW_HEIGHT / 4 - 60, WINDOW_WIDTH, 60);
+            guiRectangles[1] = new Rectangle(0, WINDOW_HEIGHT - WINDOW_HEIGHT / 4, WINDOW_WIDTH - WINDOW_WIDTH * 2 / 7, WINDOW_HEIGHT / 4);
+            guiRectangles[2] = new Rectangle(WINDOW_WIDTH - WINDOW_WIDTH * 2 / 7, 0, WINDOW_WIDTH * 2 / 7, WINDOW_HEIGHT);
+
+            electricityProjectile = Content.Load<Texture2D>("resources/particles/particle_0");
+
+            player = new Player(1500f);
             player.Texture = Content.Load<Texture2D>("resources/wizardAndStaff/wizard0");
+            player.DrawRectangle = new Rectangle(42, guiRectangles[0].Y - 306, 129, 306);
             player.AbilityPower = 10;
             player.CurrentHealth = 100;
             player.MaxHealth = 100;
             player.CurrentMana = 50;
             player.MaxMana = 50;
+            player.StaffTexture = Content.Load<Texture2D>("resources/wizardAndStaff/wizard1");
+            abilityBorder = Content.Load<Texture2D>("resources/abilities/abilityBorder");
             
-            abilities = new Ability[4];
+            abilities = new Ability[5];
             abilities[0] = new Ability(player, 10, 0.5f);
             abilities[0].Cooldown = 5f;
+            abilities[0].Timer = 5000f;
             abilities[0].Texture = Content.Load<Texture2D>("resources/abilities/ability_0");
+            abilities[1] = new Ability(player, 15, 0.6f);
+            abilities[1].Cooldown = 7f;
+            abilities[1].Timer = 7000f;
+            abilities[1].Texture = Content.Load<Texture2D>("resources/abilities/ability_1");
+            abilities[2] = new Ability(player, 15, 0.75f);
+            abilities[2].Cooldown = 8f;
+            abilities[2].Timer = 8000f;
+            abilities[2].Texture = Content.Load<Texture2D>("resources/abilities/ability_2");
+            abilities[3] = new Ability(player, 15, 0.8f);
+            abilities[3].Cooldown = 9f;
+            abilities[3].Timer = 9000f;
+            abilities[3].Texture = Content.Load<Texture2D>("resources/abilities/ability_3");
+            abilities[4] = new Ability(player, 15, 0.95f);
+            abilities[4].Cooldown = 10f;
+            abilities[4].Timer = 10000f;
+            abilities[4].Texture = Content.Load<Texture2D>("resources/abilities/ability_4");
+
+            int width = WINDOW_WIDTH - WINDOW_WIDTH * 2 / 7;
+            int border = 32;
+            int iconWidth = (width - border * 6) / 5 - border;
+
+            for (int i = 0; i < abilities.Length; i++)
+            {
+                int y = WINDOW_HEIGHT - WINDOW_HEIGHT / 4 + border;
+                int x = (iconWidth + border) * i + border;
+                abilities[i].DrawRectangle = new Rectangle(x, y, iconWidth, iconWidth);
+            }
         }
 
         /// <summary>
@@ -108,10 +154,22 @@ namespace CodeDay_Project
         {
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
-
+            player.Update(gameTime);
             for (int i = 0; i < abilities.Length; i++)
-                abilities[i]?.Update(gameTime);
-            
+            {
+                if (abilities[i] != null)
+                {
+                    if (abilities[i].DrawRectangle.Contains(Mouse.GetState().Position) && InputManager.Instance.leftMouseButtonClicked())
+                    {
+                        abilities[i].InflictOn(null);
+                    }
+                    abilities[i].Update(gameTime);
+                }
+            }
+
+            foreach (Projectile p in projectiles)
+                p.Update(gameTime);
+            InputManager.Instance.Update();
             base.Update(gameTime);
         }
 
@@ -125,18 +183,17 @@ namespace CodeDay_Project
 
             spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
                 SamplerState.PointClamp, null, null, null, null);
-
-
+            
             // players and entities
             player.Draw(spriteBatch);
+            foreach (Projectile p in projectiles)
+                p.Draw(spriteBatch);
 
             // UI
-            spriteBatch.Draw(Blank, new Rectangle(0, WINDOW_HEIGHT - WINDOW_HEIGHT / 4 - 60, WINDOW_WIDTH, 60), Color.Gray);
-            spriteBatch.Draw(Blank, new Rectangle(0, WINDOW_HEIGHT - WINDOW_HEIGHT / 4, WINDOW_WIDTH - WINDOW_WIDTH * 2 / 7, WINDOW_HEIGHT / 4), Color.LightGray);
-            spriteBatch.Draw(Blank, new Rectangle(WINDOW_WIDTH - WINDOW_WIDTH * 2 / 7, 0, WINDOW_WIDTH * 2 / 7, WINDOW_HEIGHT), Color.White);
-            int width = WINDOW_WIDTH - WINDOW_WIDTH * 2 / 7;
-            int border = 16;
-            int iconWidth = (width - border * 6) / 5 - 16;
+            spriteBatch.Draw(Blank, guiRectangles[0], Color.Gray);
+            spriteBatch.Draw(Blank, guiRectangles[1], Color.LightGray);
+            spriteBatch.Draw(abilityBorder, guiRectangles[1], Color.White);
+            spriteBatch.Draw(Blank, guiRectangles[2], Color.White);
 
             for (int i = 0; i < abilities.Length; i++)
             {
@@ -144,20 +201,24 @@ namespace CodeDay_Project
                 {
                     Color c = Color.White;
                     float ability = 0f;
+                    Rectangle rect = abilities[i].DrawRectangle;
+                    if (rect.Contains(Mouse.GetState().Position))
+                        c = Color.LightGray;
                     if (abilities[i].Timer < abilities[i].Cooldown * 1000f)
                     {
                         c = Color.Gray;
                         ability = abilities[i].Timer / 1000f;
+
+                        if (rect.Contains(Mouse.GetState().Position))
+                            c = Color.DarkGray;
                     }
-                    int y = WINDOW_HEIGHT - WINDOW_HEIGHT / 4 + border;
-                    int x = (iconWidth + border) * i;
-                    spriteBatch.Draw(abilities[i].Texture, new Rectangle(x, y, iconWidth, iconWidth), c);
+                    spriteBatch.Draw(abilities[i].Texture, rect, c);
                     if (abilities[i].Timer < abilities[i].Cooldown * 1000f)
                     {
                         string text = "" + (int)(abilities[i].Cooldown - ability + 1);
-                        spriteBatch.DrawString(Font, text, 
-                            new Vector2(x + iconWidth / 2 - Font.MeasureString(text).X / 2,
-                            y + iconWidth / 2 - Font.MeasureString(text).Y / 2), Color.LightGray);
+                        spriteBatch.DrawString(Font, text,
+                            new Vector2(rect.X + rect.Width / 2 - Font.MeasureString(text).X / 2,
+                            rect.Y + rect.Height / 2 - Font.MeasureString(text).Y / 2), Color.LightGray);
                     }
                 }
             }

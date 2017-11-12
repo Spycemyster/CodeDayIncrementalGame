@@ -97,6 +97,15 @@ namespace CodeDay_Project
             get;
             set;
         }
+
+        /// <summary>
+        /// A rectangle that the entity is drawn in.
+        /// </summary>
+        public Rectangle DrawRectangle
+        {
+            get;
+            set;
+        }
         #endregion
 
         #region Constructor
