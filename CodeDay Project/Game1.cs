@@ -25,6 +25,7 @@ namespace CodeDay_Project {
         private Ability[] abilities; //electricity, fire, ice, earth;
         private Player player;
         private Texture2D abilityBorder;
+        private Texture2D shopBorder;
         private Rectangle[] guiRectangles;
 
         private Rectangle healthBar, manaBar, cHealthBar, cManaBar;
@@ -118,6 +119,7 @@ namespace CodeDay_Project {
             groundProjectile = Content.Load<Texture2D>("resources/particles/particle_3");
 
             player = new Player(500f);
+            player.Name = "Player";
             player.Texture = Content.Load<Texture2D>("resources/wizardAndStaff/wizard0");
             player.DrawRectangle = new Rectangle(42, guiRectangles[0].Y - 306, 129, 306);
             player.AbilityPower = 10;
@@ -125,27 +127,34 @@ namespace CodeDay_Project {
             player.MaxHealth = 100;
             player.CurrentMana = 50;
             player.MaxMana = 50;
+            player.ManaRegen = 5;
             player.StaffTexture = Content.Load<Texture2D>("resources/wizardAndStaff/wizard1");
             abilityBorder = Content.Load<Texture2D>("resources/abilities/abilityBorder");
+            shopBorder = Content.Load<Texture2D>("resources/backgrounds/shopBackground");
 
             abilities = new Ability[5];
             abilities[0] = new Ability(player, 10, 0.5f);
+            abilities[0].Cost = 4;
             abilities[0].Cooldown = 5f;
             abilities[0].Timer = 5000f;
             abilities[0].Texture = Content.Load<Texture2D>("resources/abilities/ability_0");
             abilities[1] = new Ability(player, 15, 0.6f);
+            abilities[1].Cost = 12;
             abilities[1].Cooldown = 7f;
             abilities[1].Timer = 7000f;
             abilities[1].Texture = Content.Load<Texture2D>("resources/abilities/ability_1");
             abilities[2] = new Ability(player, 15, 0.75f);
+            abilities[2].Cost = 10;
             abilities[2].Cooldown = 8f;
             abilities[2].Timer = 8000f;
             abilities[2].Texture = Content.Load<Texture2D>("resources/abilities/ability_2");
             abilities[3] = new Ability(player, 15, 0.8f);
+            abilities[3].Cost = 8;
             abilities[3].Cooldown = 9f;
             abilities[3].Timer = 9000f;
             abilities[3].Texture = Content.Load<Texture2D>("resources/abilities/ability_3");
             abilities[4] = new Ability(player, 15, 0.95f);
+            abilities[4].Cost = 5;
             abilities[4].Cooldown = 10f;
             abilities[4].Timer = 10000f;
             abilities[4].Texture = Content.Load<Texture2D>("resources/abilities/ability_4");
@@ -228,7 +237,7 @@ namespace CodeDay_Project {
             }
             for (int i = 0; i < abilities.Length; i++) {
                 if (abilities[i] != null) {
-                    if (abilities[i].DrawRectangle.Contains(Mouse.GetState().Position) && InputManager.Instance.leftMouseButtonClicked()) {
+                    if (abilities[i].DrawRectangle.Contains(Mouse.GetState().Position) && InputManager.Instance.leftMouseButtonClicked() && player.CurrentMana >= abilities[i].Cost) {
                         switch (i) {
                             case 0:
                                 type = ProjectileType.ELECTRICTY;
@@ -242,7 +251,10 @@ namespace CodeDay_Project {
                             case 3:
                                 type = ProjectileType.GROUND;
                                 break;
+                            case 4:
+                                break;
                         }
+                        player.CurrentMana -= abilities[i].Cost;
                         abilities[i].InflictOn(currentEnemy);
                     }
                     abilities[i].Update(gameTime);
@@ -251,19 +263,16 @@ namespace CodeDay_Project {
             currentEnemy.Update(gameTime);
             for (int i = 0; i < projectiles.Count; i++) {
                 Vector2 pos = new Vector2(223, 250);
-                if (projectiles[i].DrawRectangle.Intersects(currentEnemy.DrawRectangle))
-                {
+                if (projectiles[i].DrawRectangle.Intersects(currentEnemy.DrawRectangle)) {
                     currentEnemy.Damage(projectiles[i].CollisionalDamage);
                     projectiles.RemoveAt(i--);
                 }
             }
 
-            if (currentEnemy != null && !currentEnemy.isAlive)
-            {
+            if (currentEnemy != null && !currentEnemy.isAlive) {
                 generateRandomEnemy(++floor % 10 == 0);
-
                 if (floor % 10 == 0)
-                    currentBackground = rand.Next(0, 2);
+                    currentBackground = rand.Next(0, 3);
             }
 
             foreach (Projectile p in projectiles)
@@ -290,11 +299,15 @@ namespace CodeDay_Project {
 
             // UI
             spriteBatch.DrawString(Font, "Floor " + floor, new Vector2(0, 0), Color.Black);
-            //spriteBatch.DrawString(Font, "Floor " + floor, new Vector2(WINDOW_WIDTH - WINDOW_WIDTH / 7 - Font.MeasureString("Floor" + floor).X / 2, 16), Color.Black);
+            spriteBatch.DrawString(SmallFont, " - ", new Vector2(Font.MeasureString("Floor " + floor).X,
+                Font.MeasureString("Floor " + floor).Y / 2 - SmallFont.MeasureString(" - ").Y / 2), Color.Black);
+            spriteBatch.DrawString(SmallFont, currentEnemy.Name, new Vector2(Font.MeasureString("Floor " + floor).X + SmallFont.MeasureString(" - ").X,
+                Font.MeasureString("Floor " + floor).Y / 2 - SmallFont.MeasureString(currentEnemy.Name).Y / 2), Color.Black);
+            spriteBatch.DrawString(SmallFont, player.Name, new Vector2(player.DrawRectangle.Width / 2 + SmallFont.MeasureString(player.Name).X / 2, player.DrawRectangle.Y - SmallFont.MeasureString(player.Name).Y - 10), Color.Black);
             spriteBatch.Draw(Blank, guiRectangles[0], Color.Gray);
             spriteBatch.Draw(Blank, guiRectangles[1], Color.LightGray);
             spriteBatch.Draw(abilityBorder, guiRectangles[1], Color.White);
-            spriteBatch.Draw(Blank, guiRectangles[2], Color.White);
+            spriteBatch.Draw(shopBorder, guiRectangles[2], Color.White);
             spriteBatch.Draw(Blank, healthBar, Color.Red * 0.4f);
             spriteBatch.Draw(Blank, manaBar, Color.Blue * 0.4f);
             spriteBatch.Draw(Blank, cManaBar, Color.Blue);
@@ -327,7 +340,7 @@ namespace CodeDay_Project {
                     }
                 }
             }
-            currentEnemy?.Draw(spriteBatch);
+            currentEnemy.Draw(spriteBatch);
             spriteBatch.End();
 
             base.Draw(gameTime);
@@ -340,12 +353,59 @@ namespace CodeDay_Project {
             float scaleFact = Math.Min(currentEnemy.Texture.Height * 3, WINDOW_HEIGHT - WINDOW_HEIGHT / 4 - 60) / (currentEnemy.Texture.Height * 3f);
             currentEnemy.DrawRectangle = new Rectangle(guiRectangles[2].X - (int)(scaleFact * currentEnemy.Texture.Width * 3),
                 guiRectangles[0].Y - (int)(scaleFact * currentEnemy.Texture.Height * 3), (int)(scaleFact * currentEnemy.Texture.Width * 3), (int)(scaleFact * currentEnemy.Texture.Height * 3));
-            currentEnemy.AbilityPower = Math.Max(1, 2 * floor * (isBoss ? 10 : 1));
-            currentEnemy.CurrentHealth = 10 * floor * (isBoss ? 10 : 1);
-            currentEnemy.MaxHealth = 100 * floor * (isBoss ? 10 : 1);
+            currentEnemy.AbilityPower = 3 * floor * (isBoss ? 10 : 1);
+            currentEnemy.CurrentHealth = 10 * floor * (isBoss ? 5 : 1);
+            currentEnemy.MaxHealth = 100 * floor * (isBoss ? 5 : 1);
             currentEnemy.CurrentMana = 0;
             currentEnemy.MaxMana = 0;
-            currentEnemy.Speed = 1500f;
+            currentEnemy.Speed = 1500 * (isBoss ? 2f : 1);
+            switch (r) {
+                case 0:
+                    currentEnemy.Name = "[BOSS] Evil Mage";
+                    break;
+                case 1:
+                    currentEnemy.Name = "[BOSS] CodeBot";
+                    break;
+                case 2:
+                    currentEnemy.Name = "[BOSS] Skeet";
+                    break;
+                case 3:
+                    currentEnemy.Name = "[BOSS] Woodman";
+                    break;
+                case 4:
+                    currentEnemy.Name = "[BOSS] 91*C Potato";
+                    break;
+                case 5:
+                    currentEnemy.Name = "pls dont sue us";
+                    break;
+                case 6:
+                    currentEnemy.Name = "null";
+                    break;
+                case 7:
+                    currentEnemy.Name = "ACT";
+                    break;
+                case 8:
+                    currentEnemy.Name = "*doot*\nSpooky Scary Skeleton\n*doot*";
+                    break;
+                case 9:
+                    currentEnemy.Name = "Slime";
+                    break;
+                case 10:
+                    currentEnemy.Name = "Cat";
+                    break;
+                case 11:
+                    currentEnemy.Name = "Rock";
+                    break;
+                case 12:
+                    currentEnemy.Name = "Spider";
+                    break;
+                case 13:
+                    currentEnemy.Name = "Imp";
+                    break;
+                case 14:
+                    currentEnemy.Name = "Orcoblin";
+                    break;
+            }
         }
     }
 }

@@ -37,6 +37,11 @@ namespace CodeDay_Project
             set;
         }
 
+        public int Cost {
+            get;
+            set;
+        }
+
         /// <summary>
         /// The amount of time needed to wait for the ability to be ready
         /// to use again.

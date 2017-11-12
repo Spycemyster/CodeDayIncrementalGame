@@ -16,26 +16,23 @@ using Microsoft.Xna.Framework.Input;
 //	Notes:				
 //-----------------------------------------------------------------
 
-namespace CodeDay_Project
-{
+namespace CodeDay_Project {
     ///	<summary>
     ///	The character that the player of the game controls.
     ///	</summary>
-    public class Player : Entity
-    {
+    public class Player : Entity {
         #region Fields
         /// <summary>
         /// The texture of the staff.
         /// </summary>
-        public Texture2D StaffTexture
-        {
+        public Texture2D StaffTexture {
             get;
             set;
         }
 
         private const int SCALE = 3;
         private float rotation;
-        private float animationTimer, attackTimer, damageTimer;
+        private float animationTimer, attackTimer, damageTimer, manaTimer;
         public bool isAttacking, isAttacked;
         public bool hasAttacked;
         #endregion
@@ -44,8 +41,7 @@ namespace CodeDay_Project
         ///	<summary>
         ///	Creates a new instance of <c>Player</c>.
         ///	</summary>
-        public Player(float Speed)
-        {
+        public Player(float Speed) {
             this.Speed = Speed;
             isAttacking = true;
             animationTimer = attackTimer = 0f;
@@ -56,8 +52,7 @@ namespace CodeDay_Project
         #endregion
 
         #region Methods
-        public override void Damage(float amount)
-        {
+        public override void Damage(float amount) {
             base.Damage(amount);
             isAttacked = true;
         }
@@ -65,13 +60,11 @@ namespace CodeDay_Project
         /// <summary>
         /// Levels up the character's stats.
         /// </summary>
-        public void LevelUp()
-        {
+        public void LevelUp() {
 
         }
 
-        public void Attack()
-        {
+        public void Attack() {
             hasAttacked = true;
         }
 
@@ -79,31 +72,31 @@ namespace CodeDay_Project
         /// Updates the player.
         /// </summary>
         /// <param name="gameTime"></param>
-        public override void Update(GameTime gameTime)
-        {
-            if (isAttacking)
-            {
+        public override void Update(GameTime gameTime) {
+            manaTimer += (float)gameTime.ElapsedGameTime.TotalMilliseconds;
+            if (manaTimer >= 5000f / ManaRegen) {
+                manaTimer = 0f;
+                CurrentMana = Math.Min(MaxMana, CurrentMana + 1);
+            }
+
+            if (isAttacking) {
                 attackTimer += (float)gameTime.ElapsedGameTime.TotalMilliseconds;
                 animationTimer += (float)gameTime.ElapsedGameTime.TotalMilliseconds;
                 rotation = (float)(-(Math.PI / 4) * Math.Cos(animationTimer * (2 * Math.PI / Speed)) + Math.PI / 6);
-                if (attackTimer >= Speed)
-                {
+                if (attackTimer >= Speed) {
                     Attack();
                     attackTimer = 0f;
                 }
             }
-            else
-            {
+            else {
                 rotation = 0;
                 animationTimer = 0;
             }
 
-            if (isAttacked)
-            {
+            if (isAttacked) {
                 damageTimer += (float)gameTime.ElapsedGameTime.TotalMilliseconds;
 
-                if (damageTimer >= 100f)
-                {
+                if (damageTimer >= 100f) {
                     damageTimer = 0f;
                     isAttacked = false;
                 }
@@ -118,8 +111,7 @@ namespace CodeDay_Project
         /// Draws the player to the screen.
         /// </summary>
         /// <param name="spriteBatch"></param>
-        public override void Draw(SpriteBatch spriteBatch)
-        {
+        public override void Draw(SpriteBatch spriteBatch) {
             base.Draw(spriteBatch);
             Color c = Color.White;
             if (isAttacked)

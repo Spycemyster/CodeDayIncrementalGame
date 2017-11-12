@@ -39,7 +39,7 @@ namespace CodeDay_Project {
         public Enemy(float Speed, Player player) {
             this.player = player;
             this.Speed = Speed;
-            attackTimer = -100f;
+            attackTimer = -500f;
             hasAttacked = false;
             isAlive = true;
             isAttacked = false;

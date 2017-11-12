@@ -27,6 +27,14 @@ namespace CodeDay_Project
         private List<Effect> effects;
 
         /// <summary>
+        /// The name of the entity.
+        /// </summary>
+        public String Name {
+            get;
+            set;
+        }
+
+        /// <summary>
         /// The amount of ability power.
         /// </summary>
         public float AbilityPower
@@ -76,6 +84,14 @@ namespace CodeDay_Project
         /// </summary>
         public float CurrentMana
         {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// Current mana pool for the entity.
+        /// </summary>
+        public float ManaRegen {
             get;
             set;
         }
@@ -147,6 +163,7 @@ namespace CodeDay_Project
             if (CurrentHealth <= 0)
             {
                 // DIE
+                CurrentHealth = 0;
                 isAlive = false;
             }
         }
