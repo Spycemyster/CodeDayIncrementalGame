@@ -1,22 +1,21 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using System;
 using System.Collections.Generic;
 
-namespace CodeDay_Project
-{
+namespace CodeDay_Project {
     /// <summary>
     /// Author: Spencer Chang, Ryan Niu
     /// Date: November 11, 2017
     /// This is the main type for your game.
     /// </summary>
-    public class Game1 : Game
-    {
+    public class Game1 : Game {
+        Random rand;
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
 
-        private enum ProjectileType
-        {
+        private enum ProjectileType {
             ELECTRICTY,
             FIRE,
             ICE,
@@ -59,9 +58,9 @@ namespace CodeDay_Project
         private const int MAX_LENGTH = 400;
         private Texture2D electricityProjectile, fireProjectile, iceProjectile, groundProjectile;
         private Enemy currentEnemy;
+        private int floor = 0;
 
-        public Game1()
-        {
+        public Game1() {
             graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
         }
@@ -72,8 +71,8 @@ namespace CodeDay_Project
         /// related content.  Calling base.Initialize will enumerate through any components
         /// and initialize them as well.
         /// </summary>
-        protected override void Initialize()
-        {
+        protected override void Initialize() {
+            rand = new Random();
             IsFixedTimeStep = false;
 
             //WINDOW_HEIGHT = graphics.GraphicsDevice.Adapter.CurrentDisplayMode.Height * 2 / 3;
@@ -90,11 +89,10 @@ namespace CodeDay_Project
         /// LoadContent will be called once per game and is the place to load
         /// all of your content.
         /// </summary>
-        protected override void LoadContent()
-        {
+        protected override void LoadContent() {
             // Create a new SpriteBatch, which can be used to draw textures.
             spriteBatch = new SpriteBatch(GraphicsDevice);
-            
+
             Blank = Content.Load<Texture2D>("Blank");
             Font = Content.Load<SpriteFont>("Font");
             SmallFont = Content.Load<SpriteFont>("RegularFont");
@@ -123,7 +121,7 @@ namespace CodeDay_Project
             player.MaxMana = 50;
             player.StaffTexture = Content.Load<Texture2D>("resources/wizardAndStaff/wizard1");
             abilityBorder = Content.Load<Texture2D>("resources/abilities/abilityBorder");
-            
+
             abilities = new Ability[5];
             abilities[0] = new Ability(player, 10, 0.5f);
             abilities[0].Cooldown = 5f;
@@ -156,21 +154,21 @@ namespace CodeDay_Project
             cHealthBar = new Rectangle(guiRectangles[0].X + border2, guiRectangles[0].Y + border2, MAX_LENGTH, 14);
             cManaBar = new Rectangle(guiRectangles[0].X + border2, guiRectangles[0].Y + guiRectangles[0].Height - 14 - border2, MAX_LENGTH, 14);
 
-            for (int i = 0; i < abilities.Length; i++)
-            {
+            for (int i = 0; i < abilities.Length; i++) {
                 int y = WINDOW_HEIGHT - WINDOW_HEIGHT / 4 + border;
                 int x = (iconWidth + border) * i + border;
                 abilities[i].DrawRectangle = new Rectangle(x, y, iconWidth, iconWidth);
             }
+
+            generateRandomEnemy(floor % 10 == 0);
         }
 
         /// <summary>
         /// UnloadContent will be called once per game and is the place to unload
         /// game-specific content.
         /// </summary>
-        protected override void UnloadContent()
-        {
-            
+        protected override void UnloadContent() {
+
         }
 
         /// <summary>
@@ -178,8 +176,7 @@ namespace CodeDay_Project
         /// checking for collisions, gathering input, and playing audio.
         /// </summary>
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
-        protected override void Update(GameTime gameTime)
-        {
+        protected override void Update(GameTime gameTime) {
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
             player.Update(gameTime);
@@ -187,11 +184,9 @@ namespace CodeDay_Project
             float percentHealth = player.CurrentHealth / player.MaxHealth;
             cHealthBar = new Rectangle(guiRectangles[0].X + border2, guiRectangles[0].Y + border2, (int)(MAX_LENGTH * percentHealth), 14);
             cManaBar = new Rectangle(guiRectangles[0].X + border2, guiRectangles[0].Y + guiRectangles[0].Height - 14 - border2, (int)(MAX_LENGTH * percentHealth), 14);
-            if (player.hasAttacked)
-            {
+            if (player.hasAttacked) {
                 Projectile p = new Projectile();
-                switch(type)
-                {
+                switch (type) {
                     case ProjectileType.ELECTRICTY:
                         p.Dimensions = new Point(120, 96);
                         p.Position = new Vector2(223, 250);
@@ -220,14 +215,10 @@ namespace CodeDay_Project
                 projectiles.Add(p);
                 player.hasAttacked = false;
             }
-            for (int i = 0; i < abilities.Length; i++)
-            {
-                if (abilities[i] != null)
-                {
-                    if (abilities[i].DrawRectangle.Contains(Mouse.GetState().Position) && InputManager.Instance.leftMouseButtonClicked())
-                    {
-                        switch (i)
-                        {
+            for (int i = 0; i < abilities.Length; i++) {
+                if (abilities[i] != null) {
+                    if (abilities[i].DrawRectangle.Contains(Mouse.GetState().Position) && InputManager.Instance.leftMouseButtonClicked()) {
+                        switch (i) {
                             case 0:
                                 type = ProjectileType.ELECTRICTY;
                                 break;
@@ -247,8 +238,7 @@ namespace CodeDay_Project
                 }
             }
 
-            for (int i = 0; i < projectiles.Count; i++)
-            {
+            for (int i = 0; i < projectiles.Count; i++) {
                 Vector2 pos = new Vector2(223, 250);
                 if (Vector2.Distance(projectiles[i].Position, pos) > 500f)
                     projectiles.RemoveAt(i--);
@@ -264,8 +254,7 @@ namespace CodeDay_Project
         /// This is called when the game should draw itself.
         /// </summary>
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
-        protected override void Draw(GameTime gameTime)
-        {
+        protected override void Draw(GameTime gameTime) {
             GraphicsDevice.Clear(Color.CornflowerBlue);
 
             spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
@@ -290,17 +279,14 @@ namespace CodeDay_Project
             spriteBatch.DrawString(SmallFont, ch, new Vector2(healthBar.X + healthBar.Width + 6, healthBar.Y + healthBar.Height / 2 - SmallFont.MeasureString(ch).Y / 2), Color.White);
             spriteBatch.DrawString(SmallFont, cm, new Vector2(manaBar.X + manaBar.Width + 6, manaBar.Y + manaBar.Height / 2 - SmallFont.MeasureString(cm).Y / 2), Color.White);
 
-            for (int i = 0; i < abilities.Length; i++)
-            {
-                if (abilities[i] != null)
-                {
+            for (int i = 0; i < abilities.Length; i++) {
+                if (abilities[i] != null) {
                     Color c = Color.White;
                     float ability = 0f;
                     Rectangle rect = abilities[i].DrawRectangle;
                     if (rect.Contains(Mouse.GetState().Position))
                         c = Color.LightGray;
-                    if (abilities[i].Timer < abilities[i].Cooldown * 1000f)
-                    {
+                    if (abilities[i].Timer < abilities[i].Cooldown * 1000f) {
                         c = Color.Gray;
                         ability = abilities[i].Timer / 1000f;
 
@@ -308,8 +294,7 @@ namespace CodeDay_Project
                             c = Color.DarkGray;
                     }
                     spriteBatch.Draw(abilities[i].Texture, rect, c);
-                    if (abilities[i].Timer < abilities[i].Cooldown * 1000f)
-                    {
+                    if (abilities[i].Timer < abilities[i].Cooldown * 1000f) {
                         string text = "" + (int)(abilities[i].Cooldown - ability + 1);
                         spriteBatch.DrawString(Font, text,
                             new Vector2(rect.X + rect.Width / 2 - Font.MeasureString(text).X / 2,
@@ -317,13 +302,24 @@ namespace CodeDay_Project
                     }
                 }
             }
+            currentEnemy.Draw(spriteBatch);
             spriteBatch.End();
 
             base.Draw(gameTime);
         }
 
-        protected Enemy generateRandomEnemy() {
-            return
+        protected void generateRandomEnemy(bool isBoss) {
+            int r = rand.Next(isBoss ? 0 : 5, isBoss ? 5 : 15);
+            currentEnemy = new Enemy(500f);
+            currentEnemy.Texture = Content.Load<Texture2D>("resources/EnemiesAndBosses/enemy_" + (r < 10 ? "0" + r : "" + r));
+            float xScale = 0;
+            float yScale = 0;
+            currentEnemy.DrawRectangle = new Rectangle(guiRectangles[2].X - currentEnemy.Texture.Width * 3, guiRectangles[0].Y - currentEnemy.Texture.Height * 3, currentEnemy.Texture.Width * 3, currentEnemy.Texture.Height * 3);
+            currentEnemy.AbilityPower = 10 * floor * (isBoss ? 10 : 1);
+            currentEnemy.CurrentHealth = 100 * floor * (isBoss ? 10 : 1);
+            currentEnemy.MaxHealth = 100 * floor * (isBoss ? 10 : 1);
+            currentEnemy.CurrentMana = 0;
+            currentEnemy.MaxMana = 0;
         }
     }
 }
