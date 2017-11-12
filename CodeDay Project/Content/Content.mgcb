@@ -657,9 +657,27 @@
 /processorParam:Quality=Best
 /build:resources/SFX/NaCl.wav
 
-#begin resources/SFX/thastWhatISaid.wav
+#begin resources/SFX/thatsWhatISaid.wav
 /importer:WavImporter
 /processor:SoundEffectProcessor
 /processorParam:Quality=Best
-/build:resources/SFX/thastWhatISaid.wav
+/build:resources/SFX/thatsWhatISaid.wav
+
+#begin resources/SFX/gameOver.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:resources/SFX/gameOver.wav
+
+#begin resources/SFX/shop0.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:resources/SFX/shop0.wav
+
+#begin resources/SFX/shop1.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:resources/SFX/shop1.wav
 

@@ -87,7 +87,7 @@ namespace CodeDay_Project {
             Texture = Content.Load<Texture2D>("resources/wizardAndStaff/wizard0");
             StaffTexture = Content.Load<Texture2D>("resources/wizardAndStaff/wizard1");
             takeDamageSfx = Content.Load<SoundEffect>("resources/SFX/playerDmg");
-            naClSfx0 = Content.Load<SoundEffect>("resources/SFX/thastWhatISaid");
+            naClSfx0 = Content.Load<SoundEffect>("resources/SFX/thatsWhatISaid");
             naClSfx1 = Content.Load<SoundEffect>("resources/SFX/NaCl");
         }
 

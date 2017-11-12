@@ -56,7 +56,7 @@ namespace CodeDay_Project {
         private Rectangle healthBar, manaBar, cHealthBar, cManaBar, coinRectangle, eHealth, ecHealth;
         private Song currentSong;
         private Song[] songs;
-        private SoundEffect selfSfx, healSfx, superSfx;
+        private SoundEffect selfSfx, healSfx, superSfx, shop0, shop1, gameOverSfx;
         /// <summary>
         /// A blank static texture. 1x1 pixel
         /// </summary>
@@ -92,7 +92,7 @@ namespace CodeDay_Project {
         private Enemy currentEnemy;
         private int floor = 1;
         private int currentBackground, currentSongNumber;
-        private bool hasChangedStances, selfBuffActive;
+        private bool hasChangedStances, selfBuffActive, hasPlayedGameOver;
         private float money, selfBuffTimer, autoSaveTimer;
 
         public Game1() {
@@ -133,12 +133,16 @@ namespace CodeDay_Project {
             selfBuffTimer = 0f;
             isDimmingUp = true;
             hasChangedStances = false;
+            hasPlayedGameOver = false;
             Blank = Content.Load<Texture2D>("Blank");
             Font = Content.Load<SpriteFont>("Font");
             SmallFont = Content.Load<SpriteFont>("RegularFont");
             superSfx = Content.Load<SoundEffect>("resources/SFX/superAbility");
             selfSfx = Content.Load<SoundEffect>("resources/SFX/selfBuff");
             healSfx = Content.Load<SoundEffect>("resources/SFX/heal");
+            shop0 = Content.Load<SoundEffect>("resources/SFX/shop0");
+            shop1 = Content.Load<SoundEffect>("resources/SFX/shop1");
+            gameOverSfx = Content.Load<SoundEffect>("resources/SFX/gameOver");
             songs = new Song[3];
             for (int i = 0; i < songs.Length; i++)
                 songs[i] = Content.Load<Song>("resources/bgm/Stage " + i);
@@ -302,6 +306,10 @@ namespace CodeDay_Project {
                     shopColors[i] = Color.DarkGray;
                     if (InputManager.Instance.leftMouseButtonClicked() && money >= shopCosts[i])
                     {
+                        if (rand.Next(0, 2) == 0)
+                            shop0.Play(0.9f, 0f, 0f);
+                        else
+                            shop1.Play(0.9f, 0f, 0f);
                         money -= shopCosts[i];
                         shopCosts[i] += (float)(Math.Log10((shopCounts[i]) * 10) * 100);
                         shopCounts[i]++;
@@ -343,6 +351,11 @@ namespace CodeDay_Project {
 
             if (!player.isAlive)
             {
+                if (!hasPlayedGameOver)
+                {
+                    hasPlayedGameOver = true;
+                    gameOverSfx.Play(0.9f, 0f, 0f);
+                }
                 dimTimer += (float)gameTime.ElapsedGameTime.TotalMilliseconds;
                 if (isDimmingUp)
                 {
@@ -372,6 +385,7 @@ namespace CodeDay_Project {
                     {
                         player.isAlive = true;
                         isDimmingUp = true;
+                        hasPlayedGameOver = false;
                     }
                 }
             }
