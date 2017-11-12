@@ -15,7 +15,8 @@ namespace CodeDay_Project {
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
 
-        private enum ProjectileType {
+        private enum ProjectileType
+        {
             ELECTRICTY,
             FIRE,
             ICE,
@@ -25,10 +26,11 @@ namespace CodeDay_Project {
         private Ability[] abilities; //electricity, fire, ice, earth;
         private Player player;
         private Texture2D abilityBorder;
-        private Texture2D shopBorder;
+        private Texture2D shopBorder, coinTexture;
+
         private Rectangle[] guiRectangles;
 
-        private Rectangle healthBar, manaBar, cHealthBar, cManaBar;
+        private Rectangle healthBar, manaBar, cHealthBar, cManaBar, coinRectangle;
 
         /// <summary>
         /// A blank static texture. 1x1 pixel
@@ -62,6 +64,7 @@ namespace CodeDay_Project {
         private Enemy currentEnemy;
         private int floor = 1;
         private int currentBackground;
+        private float money;
 
         public Game1() {
             graphics = new GraphicsDeviceManager(this);
@@ -103,6 +106,8 @@ namespace CodeDay_Project {
             backgrounds[0] = Content.Load<Texture2D>("resources/backgrounds/inside");
             backgrounds[1] = Content.Load<Texture2D>("resources/backgrounds/outside");
             backgrounds[2] = Content.Load<Texture2D>("resources/backgrounds/space");
+            coinTexture = Content.Load<Texture2D>("resources/GUI/coin");
+            money = 0f;
 
             projectiles = new List<Projectile>();
 
@@ -168,6 +173,8 @@ namespace CodeDay_Project {
             manaBar = new Rectangle(guiRectangles[0].X + border2, guiRectangles[0].Y + guiRectangles[0].Height - 14 - border2, MAX_LENGTH, 14);
             cHealthBar = new Rectangle(guiRectangles[0].X + border2, guiRectangles[0].Y + border2, MAX_LENGTH, 14);
             cManaBar = new Rectangle(guiRectangles[0].X + border2, guiRectangles[0].Y + guiRectangles[0].Height - 14 - border2, MAX_LENGTH, 14);
+            int height = (manaBar.Y + manaBar.Height) - healthBar.Y;
+            coinRectangle = new Rectangle((int)(healthBar.X + MAX_LENGTH + Font.MeasureString("100/100").X), healthBar.Y + height / 2, height, height);
 
             for (int i = 0; i < abilities.Length; i++) {
                 int y = WINDOW_HEIGHT - WINDOW_HEIGHT / 4 + border;
@@ -271,6 +278,7 @@ namespace CodeDay_Project {
 
             if (currentEnemy != null && !currentEnemy.isAlive) {
                 generateRandomEnemy(++floor % 10 == 0);
+                money += (int)Math.Log10(floor + 1) * 10 * (((floor - 1) % 10) == 0 ? 10 : 1);
                 if (floor % 10 == 0)
                     currentBackground = rand.Next(0, 3);
             }
@@ -312,6 +320,7 @@ namespace CodeDay_Project {
             spriteBatch.Draw(Blank, manaBar, Color.Blue * 0.4f);
             spriteBatch.Draw(Blank, cManaBar, Color.Blue);
             spriteBatch.Draw(Blank, cHealthBar, Color.Red);
+            spriteBatch.Draw(coinTexture, coinRectangle, Color.White);
             string ch = (int)player.CurrentHealth + "/" + (int)player.MaxHealth;
             string cm = (int)player.CurrentMana + "/" + (int)player.MaxMana;
             spriteBatch.DrawString(SmallFont, ch, new Vector2(healthBar.X + healthBar.Width + 6, healthBar.Y + healthBar.Height / 2 - SmallFont.MeasureString(ch).Y / 2), Color.White);
