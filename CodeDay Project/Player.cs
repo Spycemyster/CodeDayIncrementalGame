@@ -29,6 +29,15 @@ namespace CodeDay_Project {
         private Texture2D StaffTexture;
 
         /// <summary>
+        /// Has the active buff on.
+        /// </summary>
+        public bool HasActiveBuff
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
         /// The current enemy of the player.
         /// </summary>
         public Enemy CurrentEnemy
@@ -66,7 +75,7 @@ namespace CodeDay_Project {
         /// Loads the content.
         /// </summary>
         /// <param name="Content"></param>
-        public void LoadContent(ContentManager Content)
+        public override void LoadContent(ContentManager Content)
         {
             naclTexture = Content.Load<Texture2D>("resources/wizardAndStaff/wizard_0");
             ptsdTexture = Content.Load<Texture2D>("resources/wizardAndStaff/wizard_1");
@@ -75,6 +84,8 @@ namespace CodeDay_Project {
         }
 
         public override void Damage(float amount) {
+            if (HasActiveBuff)
+                amount /= 2;
             base.Damage(amount);
             isAttacked = true;
         }
@@ -111,8 +122,11 @@ namespace CodeDay_Project {
             if (isAttacking) {
                 attackTimer += (float)gameTime.ElapsedGameTime.TotalMilliseconds;
                 animationTimer += (float)gameTime.ElapsedGameTime.TotalMilliseconds;
-                rotation = (float)(-(Math.PI / 4) * Math.Cos(animationTimer * (2 * Math.PI / Speed)) + Math.PI / 6);
-                if (attackTimer >= Speed) {
+                float s = Speed;
+                if (HasActiveBuff)
+                    s = Speed / 2;
+                rotation = (float)(-(Math.PI / 4) * Math.Cos(animationTimer * (2 * Math.PI / s)) + Math.PI / 6);
+                if (attackTimer >= s) {
                     Attack();
                     attackTimer = 0f;
                 }
