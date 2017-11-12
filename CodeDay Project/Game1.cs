@@ -58,6 +58,7 @@ namespace CodeDay_Project
         private List<Projectile> projectiles;
         private const int MAX_LENGTH = 400;
         private Texture2D electricityProjectile, fireProjectile, iceProjectile, groundProjectile;
+        private Enemy currentEnemy;
 
         public Game1()
         {
@@ -319,6 +320,10 @@ namespace CodeDay_Project
             spriteBatch.End();
 
             base.Draw(gameTime);
+        }
+
+        protected Enemy generateRandomEnemy() {
+            return
         }
     }
 }

@@ -66,7 +66,7 @@ namespace CodeDay_Project {
                 offset = 0;
                 animationTimer = 0;
             }
-
+            
             if (InputManager.Instance.KeyPressed(Keys.P))
                 isAttacking = !isAttacking;
             base.Update(gameTime);
@@ -79,6 +79,15 @@ namespace CodeDay_Project {
         public override void Draw(SpriteBatch spriteBatch) {
             base.Draw(spriteBatch);
             spriteBatch.Draw(Texture, new Rectangle(DrawRectangle.X, DrawRectangle.Y + offset, DrawRectangle.Width, DrawRectangle.Height), Color.White);
+        }
+
+        public void collision(List<Projectile> projectiles) {
+            for (int i = 0; i < projectiles.Count; i++) {
+                if (projectiles[i].DrawRectangle.Intersects(DrawRectangle)) {
+                    projectiles.RemoveAt(i--);
+                    Damage(0);
+                }
+            }
         }
         #endregion
     }
