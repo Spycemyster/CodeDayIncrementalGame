@@ -11,11 +11,17 @@ namespace CodeDay_Project {
     /// Date: November 11, 2017
     /// This is the main type for your game.
     /// </summary>
-    public class Game1 : Game {
+    [Serializable]
+    public class Game1 : Game
+    {
+        [NonSerialized]
         Random rand;
+        [NonSerialized]
         GraphicsDeviceManager graphics;
+        [NonSerialized]
         SpriteBatch spriteBatch;
 
+        [Serializable]
         private enum ProjectileType
         {
             ELECTRICTY,
@@ -26,14 +32,24 @@ namespace CodeDay_Project {
         private ProjectileType type;
         private Ability[] abilities; //electricity, fire, ice, earth;
         private Player player;
+        [NonSerialized]
         private Texture2D abilityBorder;
+        [NonSerialized]
         private Texture2D shopBorder, coinTexture;
         private bool isDimmingUp;
         private float dimTimer;
         private float dimOpacity;
         private const float DIM_INCREMENT = 0.05f;
+        [NonSerialized]
         private Rectangle[] guiRectangles;
-
+        [NonSerialized]
+        private Texture2D[] shopIcons;
+        private float[] shopCosts;
+        [NonSerialized]
+        private Color[] shopColors;
+        [NonSerialized]
+        private Rectangle[] shopRectangles;
+        [NonSerialized]
         private Rectangle healthBar, manaBar, cHealthBar, cManaBar, coinRectangle, eHealth, ecHealth;
 
         /// <summary>
@@ -64,13 +80,15 @@ namespace CodeDay_Project {
         private List<Projectile> projectiles;
         private const int MAX_LENGTH = 400;
         private const int MAX_LENGTH2 = 400;
+        [NonSerialized]
         private Texture2D electricityProjectile, fireProjectile, iceProjectile, groundProjectile;
+        [NonSerialized]
         private Texture2D[] backgrounds;
         private Enemy currentEnemy;
         private int floor = 1;
         private int currentBackground;
         private bool hasChangedStances, selfBuffActive;
-        private float money, selfBuffTimer;
+        private float money, selfBuffTimer, autoSaveTimer;
 
         public Game1() {
             graphics = new GraphicsDeviceManager(this);
@@ -92,6 +110,7 @@ namespace CodeDay_Project {
             graphics.PreferredBackBufferWidth = WINDOW_WIDTH;
             graphics.PreferredBackBufferHeight = WINDOW_HEIGHT;
             IsMouseVisible = true;
+            Window.Title = "Memecremental";
             graphics.ApplyChanges();
 
             base.Initialize();
@@ -116,7 +135,8 @@ namespace CodeDay_Project {
             backgrounds[1] = Content.Load<Texture2D>("resources/backgrounds/outside");
             backgrounds[2] = Content.Load<Texture2D>("resources/backgrounds/space");
             coinTexture = Content.Load<Texture2D>("resources/GUI/coin");
-            money = 0f;
+            autoSaveTimer = 0f;
+            money = 100000f;
 
             projectiles = new List<Projectile>();
 
@@ -173,6 +193,33 @@ namespace CodeDay_Project {
             abilities[4].Timer = 15000f;
             abilities[4].Texture = Content.Load<Texture2D>("resources/abilities/ability_4");
 
+            shopIcons = new Texture2D[4];
+            shopIcons[0] = Content.Load<Texture2D>("resources/GUI/shopIcon_0");
+            shopIcons[1] = Content.Load<Texture2D>("resources/GUI/shopIcon_1");
+            shopIcons[2] = Content.Load<Texture2D>("resources/GUI/shopIcon_2");
+            shopIcons[3] = Content.Load<Texture2D>("resources/GUI/shopIcon_3");
+            shopCosts = new float[4];
+            shopCosts[0] = 500f;
+            shopCosts[1] = 500f;
+            shopCosts[2] = 500f;
+            shopCosts[3] = 500f;
+            shopColors = new Color[4];
+            shopColors[0] = Color.White;
+            shopColors[1] = Color.White;
+            shopColors[2] = Color.White;
+            shopColors[3] = Color.White;
+            shopRectangles = new Rectangle[4];
+            int sizeIcons = 86;
+            for (int i = 0; i < 4; i++)
+            {
+                int offset = 112 - sizeIcons;
+                shopRectangles[i] = new Rectangle(guiRectangles[2].X + offset, (148 + i * 112) + offset / 2, sizeIcons, sizeIcons);
+                //shopRectangles[0] = new Rectangle(guiRectangles[2].X + 16, 152, sizeIcons, sizeIcons);
+                //shopRectangles[1] = new Rectangle(guiRectangles[2].X + 16, 268, sizeIcons, sizeIcons);
+                //shopRectangles[2] = new Rectangle(guiRectangles[2].X + 16, 364, sizeIcons, sizeIcons);
+                //shopRectangles[3] = new Rectangle(guiRectangles[2].X + 16, 500, sizeIcons, sizeIcons);
+            }
+
             int width = WINDOW_WIDTH - WINDOW_WIDTH * 2 / 7;
             int border = 32;
             int iconWidth = (width - border * 6) / 5 - border;
@@ -221,6 +268,42 @@ namespace CodeDay_Project {
             cHealthBar = new Rectangle(guiRectangles[0].X + border2, guiRectangles[0].Y + border2, (int)(MAX_LENGTH * percentHealth), 14);
             cManaBar = new Rectangle(guiRectangles[0].X + border2, guiRectangles[0].Y + guiRectangles[0].Height - 14 - border2,
                 (int)(MAX_LENGTH * percentMana), 14);
+
+            for (int i = 0; i < shopIcons.Length; i++)
+            {
+                shopColors[i] = Color.White;
+                if (shopRectangles[i].Contains(Mouse.GetState().Position))
+                {
+                    shopColors[i] = Color.DarkGray;
+                    if (InputManager.Instance.leftMouseButtonClicked() && money >= shopCosts[i])
+                    {
+                        money -= shopCosts[i];
+                        shopCosts[i] *= 1.3f;
+
+                        switch (i)
+                        {
+                            case 0:
+                                player.CurrentHealth += 20f;
+                                player.MaxHealth += 20f;
+                                break;
+
+                            case 1:
+                                player.Defense += 1.5f;
+                                break;
+
+                            case 2:
+                                player.AbilityPower += 7f;
+                                break;
+
+                            case 3:
+                                player.Speed -= 20f;
+                                break;
+
+                        }
+
+                    }
+                }
+            }
 
             if (selfBuffActive)
             {
@@ -413,6 +496,48 @@ namespace CodeDay_Project {
             spriteBatch.Draw(Blank, eHealth, Color.Red * 0.4f);
             spriteBatch.Draw(Blank, ecHealth, Color.Red);
             spriteBatch.Draw(coinTexture, coinRectangle, Color.White);
+
+            for (int i = 0; i < shopIcons.Length; i++)
+            {
+                spriteBatch.Draw(shopIcons[i], shopRectangles[i], shopColors[i]);
+                if (shopColors[i] != Color.White)
+                {
+                    string text = shopCosts[i].ToString("C", new CultureInfo("en-US"));
+                    spriteBatch.DrawString(SmallFont, text, Mouse.GetState().Position.ToVector2() + new Vector2(1, 1), Color.Black * 0.6f);
+                    spriteBatch.DrawString(SmallFont, text, Mouse.GetState().Position.ToVector2(), Color.White);
+                }
+            }
+            string uH = "Upgrade Health";
+            string uA = "Upgrade Defense";
+            string uD = "Upgrade Damage";
+            string uS = "Upgrade Speed";
+            spriteBatch.DrawString(SmallFont, uH, new Vector2(
+                shopRectangles[0].X + shopRectangles[0].Width + 16 + 1, shopRectangles[0].Y +
+                shopRectangles[0].Height / 2 - SmallFont.MeasureString(uH).Y / 2 + 1), Color.Black * 0.5f);
+            spriteBatch.DrawString(SmallFont, uH, new Vector2(
+                shopRectangles[0].X + shopRectangles[0].Width + 16, shopRectangles[0].Y +
+                shopRectangles[0].Height / 2 - SmallFont.MeasureString(uH).Y / 2), Color.White);
+            spriteBatch.DrawString(SmallFont, uA, new Vector2(
+                shopRectangles[1].X + shopRectangles[0].Width + 17, shopRectangles[1].Y +
+                shopRectangles[1].Height / 2 - SmallFont.MeasureString(uA).Y / 2 + 1), Color.Black * 0.5f);
+            spriteBatch.DrawString(SmallFont, uA, new Vector2(
+                shopRectangles[1].X + shopRectangles[0].Width + 16, shopRectangles[1].Y +
+                shopRectangles[1].Height / 2 - SmallFont.MeasureString(uA).Y / 2), Color.White);
+            spriteBatch.DrawString(SmallFont, uD, new Vector2(1 +
+                shopRectangles[2].X + shopRectangles[0].Width + 16, 1 + shopRectangles[2].Y +
+                shopRectangles[2].Height / 2 - SmallFont.MeasureString(uD).Y / 2), Color.Black * 0.5f);
+            spriteBatch.DrawString(SmallFont, uD, new Vector2(
+                shopRectangles[2].X + shopRectangles[0].Width + 16, shopRectangles[2].Y +
+                shopRectangles[2].Height / 2 - SmallFont.MeasureString(uD).Y / 2), Color.White);
+            spriteBatch.DrawString(SmallFont, uS, new Vector2(1 +
+                shopRectangles[3].X + shopRectangles[0].Width + 16, 1 + shopRectangles[3].Y +
+                shopRectangles[3].Height / 2 - SmallFont.MeasureString(uS).Y / 2), Color.Black * 0.5f);
+            spriteBatch.DrawString(SmallFont, uS, new Vector2(
+                shopRectangles[3].X + shopRectangles[0].Width + 16, shopRectangles[3].Y +
+                shopRectangles[3].Height / 2 - SmallFont.MeasureString(uS).Y / 2), Color.White);
+
+            string credits = "Memecremental Game\nSpencer Chang     Ryan Niu";
+            spriteBatch.DrawString(SmallFont, credits, new Vector2(64 + WINDOW_WIDTH - guiRectangles[2].Width, 652 - SmallFont.MeasureString(credits).Y / 2), Color.Black);
             string moneyText = money.ToString("C", new CultureInfo("en-US"));
 
             spriteBatch.DrawString(SmallFont, moneyText, new Vector2(coinRectangle.X + coinRectangle.Width + 16, coinRectangle.Y + coinRectangle.Height / 2 - SmallFont.MeasureString(moneyText).Y / 2), Color.Black);

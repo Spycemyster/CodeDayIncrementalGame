@@ -167,7 +167,7 @@ namespace CodeDay_Project
         /// <param name="amount"></param>
         public virtual void Damage(float amount)
         {
-            CurrentHealth -= amount * (10 / (10 + Defense));
+            CurrentHealth -= amount * (50 / (50 + Defense));
 
             if (CurrentHealth <= 0)
             {
