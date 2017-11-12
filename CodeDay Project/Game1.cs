@@ -15,10 +15,20 @@ namespace CodeDay_Project
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
 
+        private enum ProjectileType
+        {
+            ELECTRICTY,
+            FIRE,
+            ICE,
+            GROUND,
+        }
+        private ProjectileType type;
         private Ability[] abilities; //electricity, fire, ice, earth;
         private Player player;
         private Texture2D abilityBorder;
         private Rectangle[] guiRectangles;
+
+        private Rectangle healthBar, manaBar, cHealthBar, cManaBar;
 
         /// <summary>
         /// A blank static texture. 1x1 pixel
@@ -31,6 +41,11 @@ namespace CodeDay_Project
         public static SpriteFont Font;
 
         /// <summary>
+        /// The default small font for all text.
+        /// </summary>
+        public static SpriteFont SmallFont;
+
+        /// <summary>
         /// Width dimension for the window.
         /// </summary>
         public const int WINDOW_WIDTH = 1280;
@@ -41,7 +56,8 @@ namespace CodeDay_Project
         public const int WINDOW_HEIGHT = 720;
 
         private List<Projectile> projectiles;
-        private Texture2D electricityProjectile, fireProjectile;
+        private const int MAX_LENGTH = 400;
+        private Texture2D electricityProjectile, fireProjectile, iceProjectile, groundProjectile;
 
         public Game1()
         {
@@ -77,12 +93,14 @@ namespace CodeDay_Project
         {
             // Create a new SpriteBatch, which can be used to draw textures.
             spriteBatch = new SpriteBatch(GraphicsDevice);
-
-            // TODO: use this.Content to load your game content here
+            
             Blank = Content.Load<Texture2D>("Blank");
             Font = Content.Load<SpriteFont>("Font");
+            SmallFont = Content.Load<SpriteFont>("RegularFont");
 
             projectiles = new List<Projectile>();
+
+            type = ProjectileType.ELECTRICTY;
 
             guiRectangles = new Rectangle[3];
             guiRectangles[0] = new Rectangle(0, WINDOW_HEIGHT - WINDOW_HEIGHT / 4 - 60, WINDOW_WIDTH, 60);
@@ -90,8 +108,11 @@ namespace CodeDay_Project
             guiRectangles[2] = new Rectangle(WINDOW_WIDTH - WINDOW_WIDTH * 2 / 7, 0, WINDOW_WIDTH * 2 / 7, WINDOW_HEIGHT);
 
             electricityProjectile = Content.Load<Texture2D>("resources/particles/particle_0");
+            fireProjectile = Content.Load<Texture2D>("resources/particles/particle_1");
+            iceProjectile = Content.Load<Texture2D>("resources/particles/particle_2");
+            groundProjectile = Content.Load<Texture2D>("resources/particles/particle_3");
 
-            player = new Player(1500f);
+            player = new Player(500f);
             player.Texture = Content.Load<Texture2D>("resources/wizardAndStaff/wizard0");
             player.DrawRectangle = new Rectangle(42, guiRectangles[0].Y - 306, 129, 306);
             player.AbilityPower = 10;
@@ -127,6 +148,12 @@ namespace CodeDay_Project
             int width = WINDOW_WIDTH - WINDOW_WIDTH * 2 / 7;
             int border = 32;
             int iconWidth = (width - border * 6) / 5 - border;
+            int border2 = 12;
+
+            healthBar = new Rectangle(guiRectangles[0].X + border2, guiRectangles[0].Y + border2, MAX_LENGTH, 14);
+            manaBar = new Rectangle(guiRectangles[0].X + border2, guiRectangles[0].Y + guiRectangles[0].Height - 14 - border2, MAX_LENGTH, 14);
+            cHealthBar = new Rectangle(guiRectangles[0].X + border2, guiRectangles[0].Y + border2, MAX_LENGTH, 14);
+            cManaBar = new Rectangle(guiRectangles[0].X + border2, guiRectangles[0].Y + guiRectangles[0].Height - 14 - border2, MAX_LENGTH, 14);
 
             for (int i = 0; i < abilities.Length; i++)
             {
@@ -155,16 +182,75 @@ namespace CodeDay_Project
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
             player.Update(gameTime);
+            int border2 = 12;
+            float percentHealth = player.CurrentHealth / player.MaxHealth;
+            cHealthBar = new Rectangle(guiRectangles[0].X + border2, guiRectangles[0].Y + border2, (int)(MAX_LENGTH * percentHealth), 14);
+            cManaBar = new Rectangle(guiRectangles[0].X + border2, guiRectangles[0].Y + guiRectangles[0].Height - 14 - border2, (int)(MAX_LENGTH * percentHealth), 14);
+            if (player.hasAttacked)
+            {
+                Projectile p = new Projectile();
+                switch(type)
+                {
+                    case ProjectileType.ELECTRICTY:
+                        p.Dimensions = new Point(120, 96);
+                        p.Position = new Vector2(223, 250);
+                        p.Texture = electricityProjectile;
+                        p.Velocity = new Vector2(10, 0);
+                        break;
+                    case ProjectileType.FIRE:
+                        p.Dimensions = new Point(128, 96);
+                        p.Position = new Vector2(223, 250);
+                        p.Texture = fireProjectile;
+                        p.Velocity = new Vector2(10, 0);
+                        break;
+                    case ProjectileType.GROUND:
+                        p.Dimensions = new Point(128, 96);
+                        p.Position = new Vector2(223, 250);
+                        p.Texture = groundProjectile;
+                        p.Velocity = new Vector2(10, 0);
+                        break;
+                    case ProjectileType.ICE:
+                        p.Dimensions = new Point(128, 96);
+                        p.Position = new Vector2(223, 250);
+                        p.Texture = iceProjectile;
+                        p.Velocity = new Vector2(10, 0);
+                        break;
+                }
+                projectiles.Add(p);
+                player.hasAttacked = false;
+            }
             for (int i = 0; i < abilities.Length; i++)
             {
                 if (abilities[i] != null)
                 {
                     if (abilities[i].DrawRectangle.Contains(Mouse.GetState().Position) && InputManager.Instance.leftMouseButtonClicked())
                     {
+                        switch (i)
+                        {
+                            case 0:
+                                type = ProjectileType.ELECTRICTY;
+                                break;
+                            case 1:
+                                type = ProjectileType.FIRE;
+                                break;
+                            case 2:
+                                type = ProjectileType.ICE;
+                                break;
+                            case 3:
+                                type = ProjectileType.GROUND;
+                                break;
+                        }
                         abilities[i].InflictOn(null);
                     }
                     abilities[i].Update(gameTime);
                 }
+            }
+
+            for (int i = 0; i < projectiles.Count; i++)
+            {
+                Vector2 pos = new Vector2(223, 250);
+                if (Vector2.Distance(projectiles[i].Position, pos) > 500f)
+                    projectiles.RemoveAt(i--);
             }
 
             foreach (Projectile p in projectiles)
@@ -183,17 +269,25 @@ namespace CodeDay_Project
 
             spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
                 SamplerState.PointClamp, null, null, null, null);
-            
+
             // players and entities
-            player.Draw(spriteBatch);
             foreach (Projectile p in projectiles)
                 p.Draw(spriteBatch);
+            player.Draw(spriteBatch);
 
             // UI
             spriteBatch.Draw(Blank, guiRectangles[0], Color.Gray);
             spriteBatch.Draw(Blank, guiRectangles[1], Color.LightGray);
             spriteBatch.Draw(abilityBorder, guiRectangles[1], Color.White);
             spriteBatch.Draw(Blank, guiRectangles[2], Color.White);
+            spriteBatch.Draw(Blank, healthBar, Color.Red * 0.4f);
+            spriteBatch.Draw(Blank, manaBar, Color.Blue * 0.4f);
+            spriteBatch.Draw(Blank, cManaBar, Color.Blue);
+            spriteBatch.Draw(Blank, cHealthBar, Color.Red);
+            string ch = (int)player.CurrentHealth + "/" + (int)player.MaxHealth;
+            string cm = (int)player.CurrentMana + "/" + (int)player.MaxMana;
+            spriteBatch.DrawString(SmallFont, ch, new Vector2(healthBar.X + healthBar.Width + 6, healthBar.Y + healthBar.Height / 2 - SmallFont.MeasureString(ch).Y / 2), Color.White);
+            spriteBatch.DrawString(SmallFont, cm, new Vector2(manaBar.X + manaBar.Width + 6, manaBar.Y + manaBar.Height / 2 - SmallFont.MeasureString(cm).Y / 2), Color.White);
 
             for (int i = 0; i < abilities.Length; i++)
             {
