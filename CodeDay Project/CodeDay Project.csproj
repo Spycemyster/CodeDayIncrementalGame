@@ -72,9 +72,9 @@
     <Content Include="Content\resources\backgrounds\outside.png" />
     <Content Include="Content\resources\backgrounds\shopBackground.png" />
     <Content Include="Content\resources\backgrounds\space.png" />
+    <Content Include="Content\resources\bgm\Stage 0.wav" />
     <Content Include="Content\resources\bgm\Stage 1.wav" />
-    <Content Include="Content\resources\bgm\Stage 3.wav" />
-    <Content Include="Content\resources\bgm\Stage 4.wav" />
+    <Content Include="Content\resources\bgm\Stage 2.wav" />
     <Content Include="Content\resources\EnemiesAndBosses\enemy_00.png" />
     <Content Include="Content\resources\EnemiesAndBosses\enemy_01.png" />
     <Content Include="Content\resources\EnemiesAndBosses\enemy_02.png" />

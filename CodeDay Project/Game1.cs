@@ -1,6 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using Microsoft.Xna.Framework.Media;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -40,6 +41,7 @@ namespace CodeDay_Project {
         private float dimTimer;
         private float dimOpacity;
         private const float DIM_INCREMENT = 0.05f;
+        private int[] shopCounts;
         [NonSerialized]
         private Rectangle[] guiRectangles;
         [NonSerialized]
@@ -51,6 +53,8 @@ namespace CodeDay_Project {
         private Rectangle[] shopRectangles;
         [NonSerialized]
         private Rectangle healthBar, manaBar, cHealthBar, cManaBar, coinRectangle, eHealth, ecHealth;
+        private Song currentSong;
+        private Song[] songs;
 
         /// <summary>
         /// A blank static texture. 1x1 pixel
@@ -79,14 +83,14 @@ namespace CodeDay_Project {
 
         private List<Projectile> projectiles;
         private const int MAX_LENGTH = 400;
-        private const int MAX_LENGTH2 = 400;
+        private const int MAX_LENGTH2 = 380;
         [NonSerialized]
         private Texture2D electricityProjectile, fireProjectile, iceProjectile, groundProjectile;
         [NonSerialized]
         private Texture2D[] backgrounds;
         private Enemy currentEnemy;
         private int floor = 1;
-        private int currentBackground;
+        private int currentBackground, currentSongNumber;
         private bool hasChangedStances, selfBuffActive;
         private float money, selfBuffTimer, autoSaveTimer;
 
@@ -123,6 +127,7 @@ namespace CodeDay_Project {
         protected override void LoadContent() {
             // Create a new SpriteBatch, which can be used to draw textures.
             spriteBatch = new SpriteBatch(GraphicsDevice);
+
             selfBuffActive = false;
             selfBuffTimer = 0f;
             isDimmingUp = true;
@@ -130,13 +135,25 @@ namespace CodeDay_Project {
             Blank = Content.Load<Texture2D>("Blank");
             Font = Content.Load<SpriteFont>("Font");
             SmallFont = Content.Load<SpriteFont>("RegularFont");
+            songs = new Song[3];
+            for (int i = 0; i < songs.Length; i++)
+                songs[i] = Content.Load<Song>("resources/bgm/Stage " + i);
+
+            currentSong = songs[0];
+            currentSongNumber = 0;
+            MediaPlayer.Volume = 0.7f;
+            MediaPlayer.Play(currentSong);
+            shopCounts = new int[4];
+           
+            for (int i = 0; i < shopCounts.Length; i++)
+                shopCounts[i] = 1;
             backgrounds = new Texture2D[3];
             backgrounds[0] = Content.Load<Texture2D>("resources/backgrounds/inside");
             backgrounds[1] = Content.Load<Texture2D>("resources/backgrounds/outside");
             backgrounds[2] = Content.Load<Texture2D>("resources/backgrounds/space");
             coinTexture = Content.Load<Texture2D>("resources/GUI/coin");
             autoSaveTimer = 0f;
-            money = 100000f;
+            money = 0f;
 
             projectiles = new List<Projectile>();
 
@@ -166,7 +183,7 @@ namespace CodeDay_Project {
             abilityBorder = Content.Load<Texture2D>("resources/abilities/abilityBorder");
             shopBorder = Content.Load<Texture2D>("resources/backgrounds/shopBackground");
 
-            abilities = new Ability[5];
+            abilities = new Ability[6];
             abilities[0] = new Ability(player, 10, 0.5f);
             abilities[0].Cost = 4;
             abilities[0].Cooldown = 5f;
@@ -188,10 +205,16 @@ namespace CodeDay_Project {
             abilities[3].Timer = 9000f;
             abilities[3].Texture = Content.Load<Texture2D>("resources/abilities/ability_3");
             abilities[4] = new Ability(player, 15, 0.95f);
-            abilities[4].Cost = 5;
+            abilities[4].Cost = 10;
             abilities[4].Cooldown = 15f;
             abilities[4].Timer = 15000f;
             abilities[4].Texture = Content.Load<Texture2D>("resources/abilities/ability_4");
+            abilities[5] = new Ability(player, 15, 1.0f);
+            abilities[5].Cost = 5;
+            abilities[5].Cooldown = 10f;
+            abilities[5].Timer = 10000f;
+            abilities[5].Texture = Content.Load<Texture2D>("resources/abilities/ability_5");
+
 
             shopIcons = new Texture2D[4];
             shopIcons[0] = Content.Load<Texture2D>("resources/GUI/shopIcon_0");
@@ -278,7 +301,8 @@ namespace CodeDay_Project {
                     if (InputManager.Instance.leftMouseButtonClicked() && money >= shopCosts[i])
                     {
                         money -= shopCosts[i];
-                        shopCosts[i] *= 1.3f;
+                        shopCosts[i] += (float)(Math.Log10((shopCounts[i]) * 10) * 100);
+                        shopCounts[i]++;
 
                         switch (i)
                         {
@@ -417,6 +441,9 @@ namespace CodeDay_Project {
                                 case 4:
                                     selfBuffActive = true;
                                     break;
+                                case 5:
+                                    player.CurrentHealth = Math.Min(player.MaxHealth, player.CurrentHealth + player.AbilityPower);
+                                    break;
                             }
                             if (i != 4)
                                 hasChangedStances = true;
@@ -447,7 +474,16 @@ namespace CodeDay_Project {
                     money += 5 + (float)Math.Log10(floor + 1) * 10 * (((floor - 1) % 10) == 0 ? 10 : 1);
 
                     if (floor % 10 == 1 && floor != 1)
+                    {
+                        int nextSong = rand.Next(0, 3);
+                        while (nextSong == currentSongNumber)
+                            nextSong = rand.Next(0, 3);
+                        currentSong = songs[nextSong];
+                        MediaPlayer.Play(currentSong);
+
+                        MediaPlayer.Volume = 0.7f;
                         currentBackground = rand.Next(0, 3);
+                    }
                 }
             }
 
@@ -634,6 +670,7 @@ namespace CodeDay_Project {
                     currentEnemy.Name = "Orcoblin";
                     break;
             }
+            currentEnemy.LoadContent(Content);
             player.CurrentEnemy = currentEnemy;
         }
     }

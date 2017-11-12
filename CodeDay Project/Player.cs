@@ -8,6 +8,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Content;
+using Microsoft.Xna.Framework.Audio;
 
 #endregion
 
@@ -27,6 +28,8 @@ namespace CodeDay_Project {
         /// The texture of the staff.
         /// </summary>
         private Texture2D StaffTexture;
+
+        private SoundEffect takeDamageSfx;
 
         /// <summary>
         /// Has the active buff on.
@@ -81,6 +84,7 @@ namespace CodeDay_Project {
             ptsdTexture = Content.Load<Texture2D>("resources/wizardAndStaff/wizard_1");
             Texture = Content.Load<Texture2D>("resources/wizardAndStaff/wizard0");
             StaffTexture = Content.Load<Texture2D>("resources/wizardAndStaff/wizard1");
+            takeDamageSfx = Content.Load<SoundEffect>("resources/SFX/playerDmg");
         }
 
         public override void Damage(float amount) {
@@ -142,6 +146,7 @@ namespace CodeDay_Project {
                 if (damageTimer >= 100f) {
                     damageTimer = 0f;
                     isAttacked = false;
+                    takeDamageSfx.Play(0.9f, 0f, 0f);
                 }
             }
 
@@ -158,7 +163,9 @@ namespace CodeDay_Project {
             base.Draw(spriteBatch);
             Color c = Color.White;
             if (isAttacked)
+            { 
                 c = Color.Red;
+            }
             Vector2 staffOrigin = new Vector2(StaffTexture.Width / 2, StaffTexture.Height / 2);
             Texture2D drawT = Texture;
             Rectangle drawRectangle = DrawRectangle;

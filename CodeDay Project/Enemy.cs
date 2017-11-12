@@ -3,6 +3,9 @@ using System;
 using System.Collections.Generic;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Audio;
+using Microsoft.Xna.Framework.Content;
+using Microsoft.Xna.Framework.Media;
 #endregion
 
 //-----------------------------------------------------------------
@@ -25,6 +28,7 @@ namespace CodeDay_Project {
         public bool hasAttacked;
         private float damageTimer;
         private Player player;
+        private SoundEffect dootSfx, takeDamageSfx;
         #endregion
 
         #region Constructor
@@ -42,9 +46,23 @@ namespace CodeDay_Project {
         #endregion
 
         #region Methods
+        /// <summary>
+        /// Loads the assets.
+        /// </summary>
+        /// <param name="Content"></param>
+        public override void LoadContent(ContentManager Content)
+        {
+            base.LoadContent(Content);
+            if (Name.Equals("*doot*\nSpooky Scary Skeleton\n*doot*"))
+                dootSfx = Content.Load<SoundEffect>("resources/SFX/doot");
+
+            takeDamageSfx = Content.Load<SoundEffect>("resources/SFX/enemyDmg");
+        }
+
         public void Attack() {
             player.Damage(AbilityPower);
             hasAttacked = true;
+            dootSfx?.Play(0.9f, 0f, 0f);
         }
 
         /// <summary>
@@ -89,6 +107,7 @@ namespace CodeDay_Project {
         public override void Damage(float amount) {
             base.Damage(amount);
             isAttacked = true;
+            takeDamageSfx?.Play(0.25f, 0f, 0f);
         }
 
         public void collision(List<Projectile> projectiles) {

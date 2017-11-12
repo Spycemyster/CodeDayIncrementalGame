@@ -579,3 +579,63 @@
 /processorParam:TextureFormat=Color
 /build:resources/GUI/shopIcon_3.png
 
+#begin resources/bgm/Stage 0.wav
+/importer:WavImporter
+/processor:SongProcessor
+/processorParam:Quality=Best
+/build:resources/bgm/Stage 0.wav
+
+#begin resources/bgm/Stage 1.wav
+/importer:WavImporter
+/processor:SongProcessor
+/processorParam:Quality=Best
+/build:resources/bgm/Stage 1.wav
+
+#begin resources/bgm/Stage 2.wav
+/importer:WavImporter
+/processor:SongProcessor
+/processorParam:Quality=Best
+/build:resources/bgm/Stage 2.wav
+
+#begin resources/abilities/ability_5.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:resources/abilities/ability_5.png
+
+#begin resources/SFX/doot.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:resources/SFX/doot.wav
+
+#begin resources/SFX/enemyDmg.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:resources/SFX/enemyDmg.wav
+
+#begin resources/SFX/playerDmg.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:resources/SFX/playerDmg.wav
+
+#begin resources/SFX/selfBuff.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:resources/SFX/selfBuff.wav
+
+#begin resources/SFX/superAbility.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:resources/SFX/superAbility.wav
+
