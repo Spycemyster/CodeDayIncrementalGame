@@ -92,6 +92,10 @@
     <Content Include="Content\resources\GUI\coin.png" />
     <Content Include="Content\resources\GUI\green.png" />
     <Content Include="Content\resources\GUI\red.png" />
+    <Content Include="Content\resources\GUI\shopIcon_0.png" />
+    <Content Include="Content\resources\GUI\shopIcon_1.png" />
+    <Content Include="Content\resources\GUI\shopIcon_2.png" />
+    <Content Include="Content\resources\GUI\shopIcon_3.png" />
     <Content Include="Content\resources\particles\particle_0.png" />
     <Content Include="Content\resources\particles\particle_1.png" />
     <Content Include="Content\resources\particles\particle_2.png" />
