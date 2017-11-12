@@ -85,6 +85,9 @@
     <Content Include="Content\resources\EnemiesAndBosses\enemy_12.png" />
     <Content Include="Content\resources\EnemiesAndBosses\enemy_13.png" />
     <Content Include="Content\resources\EnemiesAndBosses\enemy_14.png" />
+    <Content Include="Content\resources\GUI\coin.png" />
+    <Content Include="Content\resources\GUI\green.png" />
+    <Content Include="Content\resources\GUI\red.png" />
     <Content Include="Content\resources\particles\particle_0.png" />
     <Content Include="Content\resources\particles\particle_1.png" />
     <Content Include="Content\resources\particles\particle_2.png" />
